@@ -1,5 +1,10 @@
 # Nostr Codex Runner
 
+[![CI](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
+[![Release](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/joelklabo/nostr-codex-runner.svg)](https://pkg.go.dev/github.com/joelklabo/nostr-codex-runner)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
+
 Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and feeds them into `codex exec`, keeping Codex session threads alive so you can work entirely over Nostr.
 
 ## Why
@@ -39,6 +44,12 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
 - From source: `go install github.com/joelklabo/nostr-codex-runner/cmd/runner@latest`
 - From release binaries (macOS/Linux amd64/arm64): grab the asset from the GitHub Releases page, `chmod +x nostr-codex-runner-*`, and run `./nostr-codex-runner --config config.yaml`.
 - Docker image is not published yet; use the binary or source builds above.
+
+## Quick links
+- [Releases](https://github.com/joelklabo/nostr-codex-runner/releases)
+- [Open issues](https://github.com/joelklabo/nostr-codex-runner/issues)
+- [CI workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
+- [Release workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
 
 ### Web UI (local)
 - Default: enabled at `http://127.0.0.1:8080`.
