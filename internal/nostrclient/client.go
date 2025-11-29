@@ -186,9 +186,9 @@ func (c *Client) allowedList() []string {
 }
 
 // lastCursorMax returns the most recent cursor across allowed senders,
-// or defaults to now-5m to avoid replaying very old messages. Rewinds 5s to catch in-flight events.
+// or defaults to now-30s to avoid replaying old messages. Rewinds 5s to catch in-flight events.
 func (c *Client) lastCursorMax() nostr.Timestamp {
-	latest := time.Now().Add(-5 * time.Minute)
+	latest := time.Now().Add(-30 * time.Second)
 	for pk := range c.allowed {
 		if t, err := c.store.LastCursor(pk); err == nil && !t.IsZero() && t.After(latest) {
 			latest = t
