@@ -32,6 +32,8 @@ type Client struct {
 
 	secretMu sync.Mutex
 	secrets  map[string][]byte
+
+	seen *seenIDs
 }
 
 // New constructs a client pointing at the provided relays.
@@ -48,6 +50,7 @@ func New(privKey string, pubKey string, relays []string, allowedPubkeys []string
 		store:   st,
 		allowed: allowed,
 		secrets: make(map[string][]byte),
+		seen:    newSeenIDs(),
 	}
 }
 
@@ -75,8 +78,14 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 					continue
 				}
 
-				// Avoid duplicates across relays.
-				if already, _ := c.store.AlreadyProcessed(evt.ID); already {
+				if c.seen.Seen(evt.ID) {
+					continue
+				}
+				already, err := c.store.AlreadyProcessed(evt.ID)
+				if err != nil {
+					continue
+				}
+				if already {
 					continue
 				}
 
