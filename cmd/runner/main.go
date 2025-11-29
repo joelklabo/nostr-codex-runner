@@ -5,10 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -20,9 +22,15 @@ import (
 	"nostr-codex-runner/internal/config"
 	"nostr-codex-runner/internal/nostrclient"
 	"nostr-codex-runner/internal/store"
-	"nostr-codex-runner/internal/ui"
 
 	"github.com/nbd-wtf/go-nostr/nip19"
+)
+
+var (
+	processStart = time.Now()
+	buildVer     = "dev"
+	hostName     = "unknown"
+	runnerPID    = os.Getpid()
 )
 
 func main() {
@@ -34,7 +42,10 @@ func main() {
 		fatalf("load config: %v", err)
 	}
 
-	version := buildVersion()
+	buildVer = buildVersion()
+	if h, err := os.Hostname(); err == nil {
+		hostName = h
+	}
 
 	level := slog.LevelInfo
 	switch strings.ToLower(cfg.Logging.Level) {
@@ -45,14 +56,27 @@ func main() {
 	case "error":
 		level = slog.LevelError
 	}
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+	var logFile *os.File
+	writers := []io.Writer{os.Stdout}
+	if cfg.Logging.File != "" {
+		if err := os.MkdirAll(filepath.Dir(cfg.Logging.File), 0o755); err != nil {
+			fatalf("create log dir: %v", err)
+		}
+		logFile, err = os.OpenFile(cfg.Logging.File, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o600)
+		if err != nil {
+			fatalf("open log file: %v", err)
+		}
+		writers = append(writers, logFile)
+		defer logFile.Close()
+	}
+	logger := slog.New(slog.NewTextHandler(io.MultiWriter(writers...), &slog.HandlerOptions{Level: level}))
 
 	pubKey, err := cfg.GetRunnerPubKey()
 	if err != nil {
 		fatalf("derive pubkey: %v", err)
 	}
 
-	printBanner(cfg, pubKey, version)
+	printBanner(cfg, pubKey, buildVer)
 
 	st, err := store.New(cfg.Storage.Path)
 	if err != nil {
@@ -71,16 +95,9 @@ func main() {
 	errCh := make(chan error, 2)
 	go func() {
 		errCh <- client.Listen(ctx, func(msgCtx context.Context, msg nostrclient.IncomingMessage) {
-			go handleMessage(msgCtx, logger, runner, client, st, cfg, msg)
+			go handleMessage(msgCtx, logger, runner, client, st, cfg, msg, buildVer)
 		})
 	}()
-
-	if cfg.UI.Enable {
-		uiServer := ui.New(cfg, logger)
-		go func() {
-			errCh <- uiServer.Start(ctx)
-		}()
-	}
 
 	select {
 	case <-ctx.Done():
@@ -92,10 +109,12 @@ func main() {
 	}
 }
 
-func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runner, client *nostrclient.Client, st *store.Store, cfg *config.Config, msg nostrclient.IncomingMessage) {
+func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runner, client *nostrclient.Client, st *store.Store, cfg *config.Config, msg nostrclient.IncomingMessage, version string) {
 	cmd := commands.Parse(msg.Plaintext)
 	sender := msg.SenderPubKey
 	logger.Info("received DM", slog.String("from", sender), slog.String("cmd", cmd.Name))
+
+	var newSession bool
 
 	switch cmd.Name {
 	case "help":
@@ -125,8 +144,13 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 			_ = client.SendReply(ctx, sender, "Usage: /raw <shell command>")
 			return
 		}
-		reply := runRaw(ctx, cfg, cmd.Args)
-		_ = client.SendReply(ctx, sender, reply)
+		reply, exitCode := runRaw(ctx, cfg, cmd.Args)
+		if exitCode == 0 {
+			_ = client.SendReply(ctx, sender, reply)
+			return
+		}
+		runErr := fmt.Errorf("/raw exit=%d: %s", exitCode, reply)
+		handleRunError(ctx, logger, runner, client, cfg, sender, cmd.Args, runErr)
 		return
 	}
 
@@ -142,6 +166,7 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 			return
 		}
 		prompt = cmd.Args
+		newSession = true
 	case "run":
 		prompt = cmd.Args
 		if state, ok, _ := st.Active(sender); ok {
@@ -170,8 +195,7 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 
 	res, err := runner.Run(runCtx, sessionID, prompt)
 	if err != nil {
-		logger.Error("codex run failed", slog.String("from", sender), slog.String("prompt", prompt), slog.String("err", err.Error()))
-		_ = client.SendReply(ctx, sender, fmt.Sprintf("codex error: %v", err))
+		handleRunError(ctx, logger, runner, client, cfg, sender, prompt, err)
 		return
 	}
 
@@ -180,7 +204,11 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 		logger.Error("failed to save session", slog.String("err", err.Error()))
 	}
 
-	reply := formatReply(res, cfg.Runner.MaxReplyChars)
+	meta := ""
+	if newSession {
+		meta = sessionMeta(cfg, version)
+	}
+	reply := formatReply(res, cfg.Runner.MaxReplyChars, meta)
 	if cfg.Runner.AutoReply {
 		if err := client.SendReply(ctx, sender, reply); err != nil {
 			logger.Error("failed to send reply", slog.String("err", err.Error()))
@@ -188,13 +216,16 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 	}
 }
 
-func formatReply(res codex.Result, maxChars int) string {
+func formatReply(res codex.Result, maxChars int, meta string) string {
 	reply := res.Reply
 	if maxChars > 0 {
 		r := []rune(reply)
 		if len(r) > maxChars {
 			reply = string(r[:maxChars]) + "...\n(truncated)"
 		}
+	}
+	if meta != "" {
+		return fmt.Sprintf("session: %s\n%s\n\n%s", res.SessionID, meta, reply)
 	}
 	return fmt.Sprintf("session: %s\n\n%s", res.SessionID, reply)
 }
@@ -225,10 +256,9 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 			nsec = enc
 		}
 	}
-
-	uiStatus := "off"
-	if cfg.UI.Enable {
-		uiStatus = fmt.Sprintf("on @ %s", cfg.UI.Addr)
+	logVal := "stdout"
+	if cfg.Logging.File != "" {
+		logVal = fmt.Sprintf("stdout + %s", cfg.Logging.File)
 	}
 
 	lines := []struct {
@@ -238,9 +268,10 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 		{"pubkey", pubKey},
 		{"nsec", nsec},
 		{"relays", strings.Join(cfg.Relays, ", ")},
-		{"ui", uiStatus},
 		{"cwd", cfg.Codex.WorkingDir},
+		{"logs", logVal},
 		{"version", version},
+		{"pid", fmt.Sprintf("%d", runnerPID)},
 	}
 
 	const maxBannerWidth = 72
@@ -277,7 +308,7 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 		fmt.Printf("%s║%s%s%s%s║%s\n", mag, reset, gray, visible, mag, reset)
 	}
 	fmt.Println(borderBot)
-	fmt.Printf("%sTip:%s DM /help or visit the UI to create issues.\n", gray, reset)
+	fmt.Printf("%sTip:%s DM /help to see commands.\n", gray, reset)
 	fmt.Printf("%sTMUX:%s tmux attach -t nostr (logs to stdout)\n%s\n", gray, reset, reset)
 }
 
@@ -359,7 +390,7 @@ func humanBytes(b uint64) string {
 	return fmt.Sprintf("%.1f%ciB", float64(b)/float64(div), "KMGTPE"[exp])
 }
 
-func runRaw(ctx context.Context, cfg *config.Config, command string) string {
+func runRaw(ctx context.Context, cfg *config.Config, command string) (string, int) {
 	ctx, cancel := runnerTimeout(ctx, cfg)
 	defer cancel()
 
@@ -388,7 +419,7 @@ func runRaw(ctx context.Context, cfg *config.Config, command string) string {
 	}
 
 	body = truncate(body, cfg.Runner.MaxReplyChars)
-	return fmt.Sprintf("/raw exit=%d\n%s", exitCode, body)
+	return fmt.Sprintf("/raw exit=%d\n%s", exitCode, body), exitCode
 }
 
 func runnerTimeout(parent context.Context, cfg *config.Config) (context.Context, context.CancelFunc) {
@@ -408,6 +439,96 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return string(r[:max]) + "...\n(truncated)"
+}
+
+func handleRunError(ctx context.Context, logger *slog.Logger, runner *codex.Runner, client *nostrclient.Client, cfg *config.Config, sender string, prompt string, runErr error) {
+	logger.Error("codex run failed", slog.String("from", sender), slog.String("err", runErr.Error()))
+
+	logTail := tailLog(cfg.Logging.File, 8192)
+	projects := projectList(cfg)
+	diagPrompt := fmt.Sprintf(`You are HonkAI (ops/SRE). A nostr-codex-runner error occurred while handling a DM.
+
+Sender: %s
+Prompt that failed: %q
+Error: %v
+Log tail (latest): 
+%s
+
+Projects you can use: %s
+
+Tasks:
+1) Use bd to find or create an epic named "nostr-codex-runner errors" in the appropriate project (use dropdown/default project). If it exists, reuse it.
+2) Create or update an issue for this specific error (keyed by the error text). Include reproduction hints, suspected root cause, and next steps.
+3) Reply concisely (<=800 chars) summarizing the epic + issue status and what you’ll do next.
+
+ Return ONLY the reply text to send back to the user.`, sender, prompt, runErr, logTail, projects)
+
+	diagCtx, cancel := runner.ContextWithTimeout(ctx)
+	defer cancel()
+
+	res, err := runner.Run(diagCtx, "", diagPrompt)
+	if err != nil {
+		logger.Error("error handler failed", slog.String("from", sender), slog.String("err", err.Error()))
+		_ = client.SendReply(ctx, sender, fmt.Sprintf("codex error (and recovery failed): %v", runErr))
+		return
+	}
+
+	reply := formatReply(res, cfg.Runner.MaxReplyChars, "")
+	if err := client.SendReply(ctx, sender, reply); err != nil {
+		logger.Error("failed to send error reply", slog.String("err", err.Error()))
+	}
+}
+
+func projectList(cfg *config.Config) string {
+	if len(cfg.Projects) == 0 {
+		return "(none configured)"
+	}
+	var b strings.Builder
+	for i, p := range cfg.Projects {
+		if i > 0 {
+			b.WriteString("; ")
+		}
+		fmt.Fprintf(&b, "%s (%s)", p.ID, p.Path)
+	}
+	return b.String()
+}
+
+func tailLog(path string, maxBytes int64) string {
+	if path == "" {
+		return "(no log file configured)"
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Sprintf("(log unreadable: %v)", err)
+	}
+	defer f.Close()
+
+	stat, err := f.Stat()
+	if err != nil {
+		return fmt.Sprintf("(log stat error: %v)", err)
+	}
+
+	size := stat.Size()
+	if size == 0 {
+		return "(log empty)"
+	}
+	var start int64 = 0
+	if size > maxBytes {
+		start = size - maxBytes
+	}
+	if _, err := f.Seek(start, io.SeekStart); err != nil {
+		return fmt.Sprintf("(log seek error: %v)", err)
+	}
+	buf, err := io.ReadAll(f)
+	if err != nil {
+		return fmt.Sprintf("(log read error: %v)", err)
+	}
+	return string(buf)
+}
+
+func sessionMeta(cfg *config.Config, version string) string {
+	return fmt.Sprintf("runner pid=%d • host=%s • started=%s • cwd=%s • version=%s",
+		runnerPID, hostName, processStart.Format(time.RFC3339), cfg.Codex.WorkingDir, version)
 }
 
 func fatalf(msg string, args ...any) {

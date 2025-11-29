@@ -19,7 +19,6 @@ type Config struct {
 	Codex    CodexConfig   `yaml:"codex"`
 	Storage  StorageConfig `yaml:"storage"`
 	Logging  LoggingConfig `yaml:"logging"`
-	UI       UIConfig      `yaml:"ui"`
 	Projects []Project     `yaml:"projects"`
 }
 
@@ -53,13 +52,7 @@ type StorageConfig struct {
 // LoggingConfig controls log level.
 type LoggingConfig struct {
 	Level string `yaml:"level"`
-}
-
-// UIConfig controls the optional local web UI server.
-type UIConfig struct {
-	Enable    bool   `yaml:"enable"`
-	Addr      string `yaml:"addr"`
-	AuthToken string `yaml:"auth_token"`
+	File  string `yaml:"file"`
 }
 
 // Project represents a bd workspace (path containing a .beads dir).
@@ -83,6 +76,7 @@ func Load(path string) (*Config, error) {
 
 	baseDir := filepath.Dir(path)
 	cfg.applyDefaults(baseDir)
+	cfg.Storage.Path = expandPath(cfg.Storage.Path)
 	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
@@ -158,12 +152,10 @@ func (c *Config) applyDefaults(baseDir string) {
 	if c.Logging.Level == "" {
 		c.Logging.Level = "info"
 	}
-	if c.UI.Addr == "" {
-		c.UI.Addr = "127.0.0.1:8080"
-	}
-	// Default UI enabled.
-	if !c.UI.Enable {
-		c.UI.Enable = true
+	if c.Logging.File == "" {
+		if home, err := os.UserHomeDir(); err == nil {
+			c.Logging.File = filepath.Join(home, ".nostr-codex", "runner.log")
+		}
 	}
 
 	if len(c.Projects) == 0 {
@@ -192,10 +184,25 @@ func (c *Config) applyDefaults(baseDir string) {
 			c.Storage.Path = filepath.Join(home, ".nostr-codex", "state.db")
 		}
 	}
+	if c.Logging.File != "" {
+		c.Logging.File = expandPath(c.Logging.File)
+	}
 	// Normalize allowed pubkeys to lowercase hex.
 	for i, pk := range c.Runner.AllowedPubkeys {
 		c.Runner.AllowedPubkeys[i] = normalizePubkey(pk)
 	}
+}
+
+func expandPath(p string) string {
+	if p == "" {
+		return p
+	}
+	if strings.HasPrefix(p, "~") {
+		if home, err := os.UserHomeDir(); err == nil {
+			p = filepath.Join(home, strings.TrimPrefix(p, "~"))
+		}
+	}
+	return filepath.Clean(os.ExpandEnv(p))
 }
 
 func normalizePubkey(pk string) string {
