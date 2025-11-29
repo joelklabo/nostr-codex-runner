@@ -12,6 +12,8 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
     steps:
       - uses: actions/checkout@v4
       - name: Set up Go
