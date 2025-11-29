@@ -71,9 +71,8 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 		return errors.New("nil pool")
 	}
 
-	filter := c.buildFilter()
-
 	for {
+		filter := c.buildFilter()
 		events := c.pool.SubscribeMany(ctx, c.relays, filter)
 		for {
 			select {
