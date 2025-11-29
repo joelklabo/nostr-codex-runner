@@ -10,6 +10,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
 ## Command mini-DSL (DM payloads)
 - `/new [prompt]` — reset session; optional prompt starts a fresh Codex session.
 - `/use <session-id>` — switch to an existing Codex session.
+- `/raw <cmd>` — execute a shell command on the host (working dir defaults to your home directory).
 - `/status` — show your active session and last update time.
 - `/help` — recap commands.
 - _Anything else_ — treated as a prompt and executed in your active session (or a new one if none).
@@ -39,7 +40,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
 - `relays`: list of relay URLs to connect to.
 - `runner.allowed_pubkeys`: access control.
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
-- `codex.*`: CLI flags for Codex (sandbox, approval policy, working dir, extra args, timeout).
+- `codex.*`: CLI flags for Codex (sandbox, approval policy, working dir (defaults to your home), extra args, timeout).
 - `storage.path`: BoltDB file for state.
 - `logging.level`: `debug|info|warn|error`.
 

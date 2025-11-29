@@ -17,7 +17,7 @@ codex:
   sandbox: "danger-full-access"
   approval: "never"
   profile: ""
-  working_dir: "."
+  working_dir: "~"          # defaults to your home; use '/' if you truly want root
   extra_args: []
   skip_git_repo_check: true
   timeout_seconds: 900
