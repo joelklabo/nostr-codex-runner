@@ -151,3 +151,4 @@ See `CONTRIBUTING.md` for how to propose changes, run checks, and follow the `bd
 
 ## License
 MIT — see `LICENSE`.
+- Initial prompt: `runner.initial_prompt` (prepended once for new sessions). Set it to remind the agent of its purpose.

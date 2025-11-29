@@ -155,6 +155,10 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 		return
 	}
 
+	if sessionID == "" && strings.TrimSpace(cfg.Runner.InitialPrompt) != "" {
+		prompt = cfg.Runner.InitialPrompt + "\n\n" + prompt
+	}
+
 	runCtx, cancel := runner.ContextWithTimeout(ctx)
 	defer cancel()
 

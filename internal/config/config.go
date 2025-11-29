@@ -30,6 +30,7 @@ type RunnerConfig struct {
 	AutoReply          bool     `yaml:"auto_reply"`
 	MaxReplyChars      int      `yaml:"max_reply_chars"`
 	SessionTimeoutMins int      `yaml:"session_timeout_minutes"`
+	InitialPrompt      string   `yaml:"initial_prompt"`
 }
 
 // CodexConfig controls how we invoke the codex CLI.
