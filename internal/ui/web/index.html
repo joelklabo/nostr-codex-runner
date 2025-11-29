@@ -66,6 +66,7 @@
         </label>
         <label>Title<input id="issueTitle" placeholder="e.g., Add status endpoint" /></label>
         <label>Description<textarea id="issueDesc" rows="4"></textarea></label>
+        <label>Labels (comma-separated)<input id="issueLabels" placeholder="infra,backend" /></label>
         <button id="createIssue">Create Issue</button>
       </section>
 
@@ -76,6 +77,15 @@
         </div>
         <label>Issue
           <select id="editIssue"></select>
+        </label>
+        <label>Status filter
+          <select id="statusFilter">
+            <option value="open">open</option>
+            <option value="in_progress">in_progress</option>
+            <option value="blocked">blocked</option>
+            <option value="closed">closed</option>
+            <option value="">all</option>
+          </select>
         </label>
         <div class="split">
           <label>Status
@@ -100,6 +110,8 @@
         </div>
         <label>Title<input id="editTitle" placeholder="Leave blank to keep" /></label>
         <label>Description<textarea id="editDesc" rows="4" placeholder="Leave blank to keep"></textarea></label>
+        <label>Add labels (comma-separated)<input id="editAddLabels" placeholder="infra,backend" /></label>
+        <label>Remove labels (comma-separated)<input id="editRemoveLabels" placeholder="wip" /></label>
         <button id="updateIssue">Update Issue</button>
         <p class="hint" id="editMeta"></p>
       </section>

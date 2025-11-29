@@ -4,6 +4,7 @@ const epicDesc = document.getElementById('epicDesc');
 const issueType = document.getElementById('issueType');
 const issueTitle = document.getElementById('issueTitle');
 const issueDesc = document.getElementById('issueDesc');
+const issueLabels = document.getElementById('issueLabels');
 const issueParent = document.getElementById('issueParent');
 const issuePriority = document.getElementById('issuePriority');
 const editIssue = document.getElementById('editIssue');
@@ -11,6 +12,9 @@ const editStatus = document.getElementById('editStatus');
 const editTitle = document.getElementById('editTitle');
 const editDesc = document.getElementById('editDesc');
 const editPriority = document.getElementById('editPriority');
+const editAddLabels = document.getElementById('editAddLabels');
+const editRemoveLabels = document.getElementById('editRemoveLabels');
+const statusFilter = document.getElementById('statusFilter');
 const editMeta = document.getElementById('editMeta');
 const toast = document.getElementById('toast');
 
@@ -63,7 +67,9 @@ async function loadEpics() {
 
 async function loadIssues() {
   const pid = currentProject();
-  const issues = await api(`/api/projects/${pid}/issues?status=open&limit=200`);
+  const status = statusFilter.value;
+  const qs = status ? `?status=${encodeURIComponent(status)}&limit=200` : '?limit=200';
+  const issues = await api(`/api/projects/${pid}/issues${qs}`);
   editIssue.innerHTML = '';
   issues.forEach(i => {
     const opt = document.createElement('option');
@@ -120,11 +126,13 @@ async function createIssue() {
       description: issueDesc.value,
       parent: issueParent.value,
       priority: issuePriority.value,
+      labels: splitCSV(issueLabels.value),
     }),
   });
   showToast('Issue created');
   issueTitle.value = '';
   issueDesc.value = '';
+  issueLabels.value = '';
   await loadIssues();
 }
 
@@ -138,6 +146,8 @@ async function updateIssue() {
       description: editDesc.value || undefined,
       status: editStatus.value || undefined,
       priority: editPriority.value || undefined,
+      addLabels: splitCSV(editAddLabels.value),
+      removeLabels: splitCSV(editRemoveLabels.value),
     }),
   });
   showToast('Issue updated');
@@ -156,6 +166,14 @@ document.getElementById('updateIssue').onclick = () => updateIssue().catch(err =
 document.getElementById('reloadIssues').onclick = () => Promise.all([loadEpics(), loadIssues()]).catch(err => showToast(err.message, false));
 
 editIssue.addEventListener('change', (e) => loadIssueDetails(e.target.value).catch(err => showToast(err.message, false)));
+statusFilter.addEventListener('change', () => loadIssues().catch(err => showToast(err.message, false)));
+
+function splitCSV(val) {
+  return val
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+}
 
 (async function init() {
   try {

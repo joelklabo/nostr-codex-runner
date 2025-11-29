@@ -84,6 +84,14 @@ func (s *Server) withCORS(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+
+		if tok := strings.TrimSpace(s.cfg.UI.AuthToken); tok != "" {
+			auth := r.Header.Get("Authorization")
+			if auth != "Bearer "+tok {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
 		next.ServeHTTP(w, r)
 	})
 }
@@ -154,6 +162,13 @@ func (s *Server) listIssues(w http.ResponseWriter, r *http.Request, p config.Pro
 	}
 	if issueType != "" {
 		args = append(args, "--type", issueType)
+	}
+	if labelAny := q.Get("label_any"); labelAny != "" {
+		args = append(args, "--label-any", labelAny)
+	}
+
+	if labelAny := q.Get("label_any"); labelAny != "" {
+		args = append(args, "--label-any", labelAny)
 	}
 
 	out, err := runBd(r.Context(), p.Path, args...)

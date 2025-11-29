@@ -55,8 +55,9 @@ type LoggingConfig struct {
 
 // UIConfig controls the optional local web UI server.
 type UIConfig struct {
-	Enable bool   `yaml:"enable"`
-	Addr   string `yaml:"addr"`
+	Enable    bool   `yaml:"enable"`
+	Addr      string `yaml:"addr"`
+	AuthToken string `yaml:"auth_token"`
 }
 
 // Project represents a bd workspace (path containing a .beads dir).
