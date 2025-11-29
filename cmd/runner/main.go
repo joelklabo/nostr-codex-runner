@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"runtime/debug"
 	"strings"
 	"syscall"
@@ -136,8 +137,8 @@ func handleMessage(ctx context.Context, logger *slog.Logger, runner *codex.Runne
 	switch cmd.Name {
 	case "new":
 		_ = st.ClearActive(sender)
+		_ = client.SendReply(ctx, sender, machineGreeting())
 		if cmd.Args == "" {
-			_ = client.SendReply(ctx, sender, "Session reset. Send a prompt to start fresh.")
 			return
 		}
 		prompt = cmd.Args
@@ -277,7 +278,7 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 	}
 	fmt.Println(borderBot)
 	fmt.Printf("%sTip:%s DM /help or visit the UI to create issues.\n", gray, reset)
-	fmt.Printf("%sTMUX:%s tmux attach -t nostr-runner (logs to stdout)\n%s\n", gray, reset, reset)
+	fmt.Printf("%sTMUX:%s tmux attach -t nostr (logs to stdout)\n%s\n", gray, reset, reset)
 }
 
 func isTTY() bool {
@@ -326,6 +327,36 @@ func fitValue(label, value string, limit int) string {
 		}
 	}
 	return value
+}
+
+func machineGreeting() string {
+	host, _ := os.Hostname()
+	cpu := runtime.NumCPU()
+	cwd, _ := os.Getwd()
+	free := humanDiskFree(cwd)
+	return fmt.Sprintf("Starting fresh. Host=%s • CPUs=%d • Free@cwd=%s • cwd=%s", host, cpu, free, cwd)
+}
+
+func humanDiskFree(path string) string {
+	var st syscall.Statfs_t
+	if err := syscall.Statfs(path, &st); err != nil {
+		return "n/a"
+	}
+	free := st.Bavail * uint64(st.Bsize)
+	return humanBytes(free)
+}
+
+func humanBytes(b uint64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%dB", b)
+	}
+	div, exp := unit, 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f%ciB", float64(b)/float64(div), "KMGTPE"[exp])
 }
 
 func runRaw(ctx context.Context, cfg *config.Config, command string) string {
