@@ -38,6 +38,10 @@ type Client struct {
 	lastMu    sync.Mutex
 	lastMsg   map[string]lastSeen
 	windowDur time.Duration
+
+	senderMu    sync.Mutex
+	senderLocks map[string]*sync.Mutex
+	msgWindow   time.Duration
 }
 
 type lastSeen struct {
@@ -52,16 +56,18 @@ func New(privKey string, pubKey string, relays []string, allowedPubkeys []string
 		allowed[strings.ToLower(pk)] = struct{}{}
 	}
 	return &Client{
-		pool:      nostr.NewSimplePool(context.Background()),
-		privKey:   privKey,
-		pubKey:    strings.ToLower(pubKey),
-		relays:    relays,
-		store:     st,
-		allowed:   allowed,
-		secrets:   make(map[string][]byte),
-		seen:      newSeenIDs(),
-		lastMsg:   make(map[string]lastSeen),
-		windowDur: 8 * time.Second,
+		pool:        nostr.NewSimplePool(context.Background()),
+		privKey:     privKey,
+		pubKey:      strings.ToLower(pubKey),
+		relays:      relays,
+		store:       st,
+		allowed:     allowed,
+		secrets:     make(map[string][]byte),
+		seen:        newSeenIDs(),
+		lastMsg:     make(map[string]lastSeen),
+		windowDur:   8 * time.Second,
+		senderLocks: make(map[string]*sync.Mutex),
+		msgWindow:   30 * time.Second,
 	}
 }
 
@@ -109,18 +115,28 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 					continue
 				}
 
-				dec, err := nip04.Decrypt(evt.Content, secret)
-				if err != nil {
-					continue
-				}
+				lock := c.senderLock(sender)
+				go func(e *nostr.Event, s string, sec []byte) {
+					lock.Lock()
+					defer lock.Unlock()
 
-				if c.isReplay(sender, dec, evt.CreatedAt.Time()) {
-					continue
-				}
+					dec, err := nip04.Decrypt(e.Content, sec)
+					if err != nil {
+						return
+					}
 
-				_ = c.store.SaveCursor(sender, evt.CreatedAt.Time())
+					if seen, err := c.store.RecentMessageSeen(s, dec, c.msgWindow); err == nil && seen {
+						return
+					}
 
-				go handler(ctx, IncomingMessage{Event: evt, SenderPubKey: sender, Plaintext: dec})
+					if c.isReplay(s, dec, e.CreatedAt.Time()) {
+						return
+					}
+
+					_ = c.store.SaveCursor(s, e.CreatedAt.Time())
+
+					handler(ctx, IncomingMessage{Event: e, SenderPubKey: s, Plaintext: dec})
+				}(evt, sender, secret)
 			}
 		}
 	resubscribe:
@@ -225,4 +241,16 @@ func (c *Client) isReplay(sender, plaintext string, at time.Time) bool {
 	}
 	c.lastMsg[sender] = lastSeen{text: plaintext, ts: at}
 	return false
+}
+
+// senderLock returns a per-sender mutex to serialize handling of messages from the same pubkey.
+func (c *Client) senderLock(sender string) *sync.Mutex {
+	c.senderMu.Lock()
+	defer c.senderMu.Unlock()
+	if m, ok := c.senderLocks[sender]; ok {
+		return m
+	}
+	m := &sync.Mutex{}
+	c.senderLocks[sender] = m
+	return m
 }

@@ -1,10 +1,13 @@
 package store
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	bolt "go.etcd.io/bbolt"
@@ -14,6 +17,7 @@ var (
 	bucketActive    = []byte("active_sessions")
 	bucketCursor    = []byte("cursors")
 	bucketProcessed = []byte("processed")
+	bucketMessages  = []byte("messages")
 )
 
 // SessionState represents the current Codex session for a sender.
@@ -45,6 +49,9 @@ func New(path string) (*Store, error) {
 			return err
 		}
 		if _, err := tx.CreateBucketIfNotExists(bucketProcessed); err != nil {
+			return err
+		}
+		if _, err := tx.CreateBucketIfNotExists(bucketMessages); err != nil {
 			return err
 		}
 		return nil
@@ -149,4 +156,32 @@ func (s *Store) AlreadyProcessed(id string) (bool, error) {
 		return b.Put([]byte(id), []byte{1})
 	})
 	return existed, err
+}
+
+// RecentMessageSeen returns true if the same sender/plaintext was seen within the window.
+// It also records the current occurrence.
+func (s *Store) RecentMessageSeen(sender, plaintext string, window time.Duration) (bool, error) {
+	if window <= 0 {
+		window = 30 * time.Second
+	}
+	sender = strings.ToLower(strings.TrimSpace(sender))
+	body := strings.TrimSpace(plaintext)
+	h := sha256.Sum256([]byte(body))
+	key := sender + ":" + hex.EncodeToString(h[:])
+	now := time.Now().UTC()
+
+	var seen bool
+	err := s.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(bucketMessages)
+		v := b.Get([]byte(key))
+		if v != nil {
+			if ts, err := time.Parse(time.RFC3339Nano, string(v)); err == nil {
+				if now.Sub(ts) < window {
+					seen = true
+				}
+			}
+		}
+		return b.Put([]byte(key), []byte(now.Format(time.RFC3339Nano)))
+	})
+	return seen, err
 }
