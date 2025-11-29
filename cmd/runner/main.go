@@ -274,38 +274,41 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 		{"pid", fmt.Sprintf("%d", runnerPID)},
 	}
 
-	const maxBannerWidth = 72
-
+	const maxBannerWidth = 64 // fits narrow terminals and avoids wrap
 	title := "nostr-codex-runner"
-	maxLen := displayWidth(title)
-	for _, l := range lines {
-		l.value = fitValue(l.label, l.value, maxBannerWidth-4)
-		plain := fmt.Sprintf("%s  %s", l.label, l.value)
-		if displayWidth(plain) > maxLen {
-			maxLen = displayWidth(plain)
+
+	// compute inner width (content only, borders excluded)
+	innerWidth := displayWidth(title)
+	for i, l := range lines {
+		l.value = fitValue(l.label, l.value, maxBannerWidth-6) // allow label + space + value within width
+		lines[i].value = l.value
+		plain := fmt.Sprintf("%s %s", l.label, l.value)
+		if w := displayWidth(plain); w > innerWidth {
+			innerWidth = w
 		}
 	}
-	padding := 2
-	width := maxLen + padding*2
-	if width > maxBannerWidth {
-		width = maxBannerWidth
+	if innerWidth < displayWidth(title) {
+		innerWidth = displayWidth(title)
+	}
+	if innerWidth > maxBannerWidth {
+		innerWidth = maxBannerWidth
 	}
 
-	borderTop := fmt.Sprintf("%s╔%s╗%s", mag, strings.Repeat("═", width), reset)
-	borderMid := fmt.Sprintf("%s╠%s╣%s", mag, strings.Repeat("═", width), reset)
-	borderBot := fmt.Sprintf("%s╚%s╝%s", mag, strings.Repeat("═", width), reset)
+	borderTop := fmt.Sprintf("%s╔%s╗%s", mag, strings.Repeat("═", innerWidth+2), reset)
+	borderMid := fmt.Sprintf("%s╠%s╣%s", mag, strings.Repeat("═", innerWidth+2), reset)
+	borderBot := fmt.Sprintf("%s╚%s╝%s", mag, strings.Repeat("═", innerWidth+2), reset)
 
 	fmt.Println(borderTop)
-	fmt.Printf("%s║%s%s%s║%s\n", mag, reset, center(title, width), mag, reset)
+	fmt.Printf("%s║ %s%s%s %s║%s\n", mag, reset, center(title, innerWidth), mag, reset)
 	fmt.Println(borderMid)
 	for _, l := range lines {
-		plain := fmt.Sprintf("%s  %s", l.label, l.value)
-		pad := width - displayWidth(plain)
+		plain := fmt.Sprintf("%s %s", l.label, l.value)
+		pad := innerWidth - displayWidth(plain)
 		if pad < 0 {
 			pad = 0
 		}
-		visible := fmt.Sprintf("%s  %s%s%s", l.label, cyan, l.value, reset) + strings.Repeat(" ", pad)
-		fmt.Printf("%s║%s%s%s%s║%s\n", mag, reset, gray, visible, mag, reset)
+		visible := fmt.Sprintf("%s %s%s%s%s", l.label, cyan, l.value, reset, strings.Repeat(" ", pad))
+		fmt.Printf("%s║ %s%s%s║%s\n", mag, reset, gray, visible, mag, reset)
 	}
 	fmt.Println(borderBot)
 	fmt.Printf("%sTip:%s DM /help to see commands.\n", gray, reset)
