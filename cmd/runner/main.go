@@ -277,12 +277,12 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 	const maxBannerWidth = 72
 
 	title := "nostr-codex-runner"
-	maxLen := len(title)
+	maxLen := displayWidth(title)
 	for _, l := range lines {
 		l.value = fitValue(l.label, l.value, maxBannerWidth-4)
 		plain := fmt.Sprintf("%s  %s", l.label, l.value)
-		if len(plain) > maxLen {
-			maxLen = len(plain)
+		if displayWidth(plain) > maxLen {
+			maxLen = displayWidth(plain)
 		}
 	}
 	padding := 2
@@ -300,7 +300,7 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 	fmt.Println(borderMid)
 	for _, l := range lines {
 		plain := fmt.Sprintf("%s  %s", l.label, l.value)
-		pad := width - len(plain)
+		pad := width - displayWidth(plain)
 		if pad < 0 {
 			pad = 0
 		}
@@ -336,10 +336,10 @@ func nostrEncodeNsec(sk string) (string, error) {
 }
 
 func center(s string, width int) string {
-	if len(s) >= width {
+	if displayWidth(s) >= width {
 		return s
 	}
-	pad := width - len(s)
+	pad := width - displayWidth(s)
 	left := pad / 2
 	right := pad - left
 	return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
@@ -358,6 +358,10 @@ func fitValue(label, value string, limit int) string {
 		}
 	}
 	return value
+}
+
+func displayWidth(s string) int {
+	return len([]rune(s))
 }
 
 func machineGreeting() string {
