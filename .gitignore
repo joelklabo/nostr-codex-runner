@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+dist/
+*.out
+*.exe
+*.log
+coverage*
+
+# Go
+*.test
+
+# Local config/state
+config.yaml
+.env
+state.db
+.beads/
+
+# macOS
+.DS_Store
