@@ -28,6 +28,5 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60.1
-          install-mode: go   # build with the configured Go toolchain to match export data versions
           skip-cache: true
           args: --modules-download-mode=mod --disable typecheck ./...
