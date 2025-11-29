@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip19"
 	"gopkg.in/yaml.v3"
 )
 
@@ -185,8 +186,22 @@ func (c *Config) applyDefaults(baseDir string) {
 			c.Projects[i].Path = abs
 		}
 	}
-	// Ensure keys are lowercase to avoid mismatches.
+	// Normalize allowed pubkeys to lowercase hex.
 	for i, pk := range c.Runner.AllowedPubkeys {
-		c.Runner.AllowedPubkeys[i] = strings.ToLower(pk)
+		c.Runner.AllowedPubkeys[i] = normalizePubkey(pk)
 	}
+}
+
+func normalizePubkey(pk string) string {
+	pk = strings.TrimSpace(pk)
+	pk = strings.ToLower(pk)
+	if strings.HasPrefix(pk, "npub") {
+		kind, data, err := nip19.Decode(pk)
+		if err == nil && kind == "npub" {
+			if hex, ok := data.(string); ok {
+				return strings.ToLower(hex)
+			}
+		}
+	}
+	return pk
 }
