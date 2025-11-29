@@ -34,6 +34,15 @@ type Client struct {
 	secrets  map[string][]byte
 
 	seen *seenIDs
+
+	lastMu    sync.Mutex
+	lastMsg   map[string]lastSeen
+	windowDur time.Duration
+}
+
+type lastSeen struct {
+	text string
+	ts   time.Time
 }
 
 // New constructs a client pointing at the provided relays.
@@ -43,14 +52,16 @@ func New(privKey string, pubKey string, relays []string, allowedPubkeys []string
 		allowed[strings.ToLower(pk)] = struct{}{}
 	}
 	return &Client{
-		pool:    nostr.NewSimplePool(context.Background()),
-		privKey: privKey,
-		pubKey:  strings.ToLower(pubKey),
-		relays:  relays,
-		store:   st,
-		allowed: allowed,
-		secrets: make(map[string][]byte),
-		seen:    newSeenIDs(),
+		pool:      nostr.NewSimplePool(context.Background()),
+		privKey:   privKey,
+		pubKey:    strings.ToLower(pubKey),
+		relays:    relays,
+		store:     st,
+		allowed:   allowed,
+		secrets:   make(map[string][]byte),
+		seen:      newSeenIDs(),
+		lastMsg:   make(map[string]lastSeen),
+		windowDur: 8 * time.Second,
 	}
 }
 
@@ -99,14 +110,18 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 					continue
 				}
 
-				plaintext, err := nip04.Decrypt(evt.Content, secret)
+				dec, err := nip04.Decrypt(evt.Content, secret)
 				if err != nil {
+					continue
+				}
+
+				if c.isReplay(sender, dec, evt.CreatedAt.Time()) {
 					continue
 				}
 
 				_ = c.store.SaveCursor(sender, evt.CreatedAt.Time())
 
-				go handler(ctx, IncomingMessage{Event: evt, SenderPubKey: sender, Plaintext: plaintext})
+				go handler(ctx, IncomingMessage{Event: evt, SenderPubKey: sender, Plaintext: dec})
 			}
 		}
 	resubscribe:
@@ -196,4 +211,19 @@ func (c *Client) lastCursorMax() nostr.Timestamp {
 	}
 	latest = latest.Add(-5 * time.Second)
 	return nostr.Timestamp(latest.Unix())
+}
+
+// isReplay drops identical plaintext from same sender within windowDur.
+func (c *Client) isReplay(sender, plaintext string, at time.Time) bool {
+	c.lastMu.Lock()
+	defer c.lastMu.Unlock()
+	if c.windowDur == 0 {
+		c.windowDur = 8 * time.Second
+	}
+	ls, ok := c.lastMsg[sender]
+	if ok && ls.text == plaintext && at.Sub(ls.ts) < c.windowDur {
+		return true
+	}
+	c.lastMsg[sender] = lastSeen{text: plaintext, ts: at}
+	return false
 }
