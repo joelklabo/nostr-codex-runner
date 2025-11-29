@@ -59,6 +59,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
   curl -fsSL https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/scripts/install.sh | bash
   ```
   Customize with env vars: `INSTALL_DIR`, `CONFIG_DIR`, `VERSION` (tag or `latest`).
+- Prerequisite: Codex CLI must be installed and on `PATH` (full-access mode configured by default).
  - Full-access Codex: config sets `sandbox: danger-full-access`, `approval: never`, and `extra_args: ["--dangerously-bypass-approvals-and-sandbox"]` to give the agent unrestricted system access. Keep this only on trusted machines.
 
 ## Running it remotely / outside your LAN
