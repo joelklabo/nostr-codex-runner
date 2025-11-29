@@ -30,6 +30,8 @@ type RunnerConfig struct {
 	MaxReplyChars      int      `yaml:"max_reply_chars"`
 	SessionTimeoutMins int      `yaml:"session_timeout_minutes"`
 	InitialPrompt      string   `yaml:"initial_prompt"`
+	ProfileName        string   `yaml:"profile_name"`
+	ProfileImage       string   `yaml:"profile_image"`
 }
 
 // CodexConfig controls how we invoke the codex CLI.
@@ -129,6 +131,12 @@ func (c *Config) applyDefaults(baseDir string) {
 	}
 	if c.Runner.SessionTimeoutMins == 0 {
 		c.Runner.SessionTimeoutMins = 240
+	}
+	if c.Runner.ProfileName == "" {
+		c.Runner.ProfileName = "nostr-codex-runner"
+	}
+	if c.Runner.ProfileImage == "" {
+		c.Runner.ProfileImage = "https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/assets/social-preview.svg"
 	}
 	if c.Codex.Sandbox == "" {
 		c.Codex.Sandbox = "danger-full-access"

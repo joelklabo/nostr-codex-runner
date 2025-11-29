@@ -11,6 +11,8 @@ runner:
   auto_reply: true
   max_reply_chars: 8000
   session_timeout_minutes: 240
+  profile_name: "nostr-codex-runner"
+  profile_image: "https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/assets/social-preview.svg"
 
 codex:
   binary: "codex"

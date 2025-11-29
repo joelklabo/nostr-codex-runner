@@ -98,6 +98,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	profileCtx, cancelProfile := context.WithTimeout(ctx, 5*time.Second)
+	if err := client.PublishProfile(profileCtx, cfg.Runner.ProfileName, cfg.Runner.ProfileImage); err != nil {
+		logger.Warn("failed to publish nostr profile", slog.String("err", err.Error()))
+	}
+	cancelProfile()
+
 	logger.Info("nostr-codex-runner starting", slog.String("pubkey", pubKey), slog.Any("relays", cfg.Relays))
 
 	errCh := make(chan error, 2)

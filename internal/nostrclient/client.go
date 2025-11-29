@@ -2,6 +2,7 @@ package nostrclient
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -175,6 +176,44 @@ func (c *Client) SendReply(ctx context.Context, toPubKey string, message string)
 	}
 	if err := ev.Sign(c.privKey); err != nil {
 		return fmt.Errorf("sign DM: %w", err)
+	}
+
+	results := c.pool.PublishMany(ctx, c.relays, ev)
+	var firstErr error
+	for res := range results {
+		if res.Error != nil && firstErr == nil {
+			firstErr = res.Error
+		}
+	}
+	return firstErr
+}
+
+// PublishProfile broadcasts the runner's metadata (name, picture) to configured relays.
+func (c *Client) PublishProfile(ctx context.Context, name, picture string) error {
+	meta := make(map[string]string, 2)
+	if strings.TrimSpace(name) != "" {
+		meta["name"] = name
+	}
+	if strings.TrimSpace(picture) != "" {
+		meta["picture"] = picture
+	}
+	if len(meta) == 0 {
+		return nil
+	}
+
+	content, err := json.Marshal(meta)
+	if err != nil {
+		return fmt.Errorf("marshal profile: %w", err)
+	}
+
+	ev := nostr.Event{
+		PubKey:    c.pubKey,
+		CreatedAt: nostr.Now(),
+		Kind:      nostr.KindProfileMetadata,
+		Content:   string(content),
+	}
+	if err := ev.Sign(c.privKey); err != nil {
+		return fmt.Errorf("sign profile: %w", err)
 	}
 
 	results := c.pool.PublishMany(ctx, c.relays, ev)
