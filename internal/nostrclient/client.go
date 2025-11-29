@@ -115,15 +115,7 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 }
 
 func (c *Client) buildFilter() nostr.Filter {
-	since := nostr.Timestamp(time.Now().Add(-2 * time.Hour).Unix())
-	for pk := range c.allowed {
-		if t, err := c.store.LastCursor(pk); err == nil && !t.IsZero() {
-			ts := nostr.Timestamp(t.Unix())
-			if ts < since {
-				since = ts
-			}
-		}
-	}
+	since := c.lastCursorMax()
 	return nostr.Filter{
 		Kinds:   []int{nostr.KindEncryptedDirectMessage},
 		Authors: c.allowedList(),
@@ -191,4 +183,17 @@ func (c *Client) allowedList() []string {
 		res = append(res, pk)
 	}
 	return res
+}
+
+// lastCursorMax returns the most recent cursor across allowed senders,
+// or defaults to now-5m to avoid replaying very old messages. Rewinds 5s to catch in-flight events.
+func (c *Client) lastCursorMax() nostr.Timestamp {
+	latest := time.Now().Add(-5 * time.Minute)
+	for pk := range c.allowed {
+		if t, err := c.store.LastCursor(pk); err == nil && !t.IsZero() && t.After(latest) {
+			latest = t
+		}
+	}
+	latest = latest.Add(-5 * time.Second)
+	return nostr.Timestamp(latest.Unix())
 }
