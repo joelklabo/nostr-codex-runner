@@ -225,20 +225,57 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 		}
 	}
 
-	fmt.Printf("%s╔══════════════════════════════════════════════════════╗%s\n", mag, reset)
-	fmt.Printf("%s║%s  nostr-codex-runner                             %s║%s\n", mag, reset, mag, reset)
-	fmt.Printf("%s╠══════════════════════════════════════════════════════╣%s\n", mag, reset)
-	fmt.Printf("%s║%s pubkey  %s%s%s\n", mag, reset, cyan, pubKey, reset)
-	fmt.Printf("%s║%s nsec    %s%s%s\n", mag, reset, cyan, nsec, reset)
-	fmt.Printf("%s║%s relays  %s%s%s\n", mag, reset, cyan, strings.Join(cfg.Relays, ", "), reset)
 	uiStatus := "off"
 	if cfg.UI.Enable {
 		uiStatus = fmt.Sprintf("on @ %s", cfg.UI.Addr)
 	}
-	fmt.Printf("%s║%s ui      %s%s%s\n", mag, reset, cyan, uiStatus, reset)
-	fmt.Printf("%s║%s cwd     %s%s%s\n", mag, reset, cyan, cfg.Codex.WorkingDir, reset)
-	fmt.Printf("%s║%s version %s%s%s\n", mag, reset, cyan, version, reset)
-	fmt.Printf("%s╚══════════════════════════════════════════════════════╝%s\n", mag, reset)
+
+	lines := []struct {
+		label string
+		value string
+	}{
+		{"pubkey", pubKey},
+		{"nsec", nsec},
+		{"relays", strings.Join(cfg.Relays, ", ")},
+		{"ui", uiStatus},
+		{"cwd", cfg.Codex.WorkingDir},
+		{"version", version},
+	}
+
+	const maxBannerWidth = 96
+
+	title := "nostr-codex-runner"
+	maxLen := len(title)
+	for _, l := range lines {
+		l.value = fitValue(l.label, l.value, maxBannerWidth-4)
+		plain := fmt.Sprintf("%s  %s", l.label, l.value)
+		if len(plain) > maxLen {
+			maxLen = len(plain)
+		}
+	}
+	padding := 2
+	width := maxLen + padding*2
+	if width > maxBannerWidth {
+		width = maxBannerWidth
+	}
+
+	borderTop := fmt.Sprintf("%s╔%s╗%s", mag, strings.Repeat("═", width), reset)
+	borderMid := fmt.Sprintf("%s╠%s╣%s", mag, strings.Repeat("═", width), reset)
+	borderBot := fmt.Sprintf("%s╚%s╝%s", mag, strings.Repeat("═", width), reset)
+
+	fmt.Println(borderTop)
+	fmt.Printf("%s║%s%s%s║%s\n", mag, reset, center(title, width), mag, reset)
+	fmt.Println(borderMid)
+	for _, l := range lines {
+		plain := fmt.Sprintf("%s  %s", l.label, l.value)
+		pad := width - len(plain)
+		if pad < 0 {
+			pad = 0
+		}
+		visible := fmt.Sprintf("%s  %s%s%s", l.label, cyan, l.value, reset) + strings.Repeat(" ", pad)
+		fmt.Printf("%s║%s%s%s%s║%s\n", mag, reset, gray, visible, mag, reset)
+	}
+	fmt.Println(borderBot)
 	fmt.Printf("%sTip:%s DM /help or visit the UI to create issues.\n", gray, reset)
 	fmt.Printf("%sTMUX:%s tmux attach -t nostr-runner (logs to stdout)\n%s\n", gray, reset, reset)
 }
@@ -264,6 +301,31 @@ func nostrEncodeNsec(sk string) (string, error) {
 		return "", err
 	}
 	return enc, nil
+}
+
+func center(s string, width int) string {
+	if len(s) >= width {
+		return s
+	}
+	pad := width - len(s)
+	left := pad / 2
+	right := pad - left
+	return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
+}
+
+func fitValue(label, value string, limit int) string {
+	max := limit - len(label) - 2
+	if max < 8 {
+		max = 8
+	}
+	if len(value) > max {
+		if max > 5 {
+			value = value[:max-3] + "..."
+		} else {
+			value = value[:max]
+		}
+	}
+	return value
 }
 
 func runRaw(ctx context.Context, cfg *config.Config, command string) string {
