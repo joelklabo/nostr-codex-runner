@@ -242,7 +242,7 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 		{"version", version},
 	}
 
-	const maxBannerWidth = 96
+	const maxBannerWidth = 72
 
 	title := "nostr-codex-runner"
 	maxLen := len(title)
