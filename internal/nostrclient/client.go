@@ -57,8 +57,56 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 		return errors.New("nil pool")
 	}
 
+	filter := c.buildFilter()
+
+	for {
+		events := c.pool.SubscribeMany(ctx, c.relays, filter)
+		for {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case ie, ok := <-events:
+				if !ok {
+					time.Sleep(2 * time.Second)
+					goto resubscribe
+				}
+				evt := ie.Event
+				if evt == nil {
+					continue
+				}
+
+				// Avoid duplicates across relays.
+				if already, _ := c.store.AlreadyProcessed(evt.ID); already {
+					continue
+				}
+
+				sender := strings.ToLower(evt.PubKey)
+				if _, ok := c.allowed[sender]; !ok {
+					continue
+				}
+
+				secret, err := c.sharedSecret(sender)
+				if err != nil {
+					continue
+				}
+
+				plaintext, err := nip04.Decrypt(evt.Content, secret)
+				if err != nil {
+					continue
+				}
+
+				_ = c.store.SaveCursor(sender, evt.CreatedAt.Time())
+
+				go handler(ctx, IncomingMessage{Event: evt, SenderPubKey: sender, Plaintext: plaintext})
+			}
+		}
+	resubscribe:
+		continue
+	}
+}
+
+func (c *Client) buildFilter() nostr.Filter {
 	since := nostr.Timestamp(time.Now().Add(-2 * time.Hour).Unix())
-	// Use earliest cursor among allowed senders so we catch anything missed.
 	for pk := range c.allowed {
 		if t, err := c.store.LastCursor(pk); err == nil && !t.IsZero() {
 			ts := nostr.Timestamp(t.Unix())
@@ -67,53 +115,11 @@ func (c *Client) Listen(ctx context.Context, handler func(context.Context, Incom
 			}
 		}
 	}
-
-	filter := nostr.Filter{
+	return nostr.Filter{
 		Kinds:   []int{nostr.KindEncryptedDirectMessage},
 		Authors: c.allowedList(),
 		Since:   &since,
 		Tags:    nostr.TagMap{"p": []string{c.pubKey}},
-	}
-
-	events := c.pool.SubManyEose(ctx, c.relays, nostr.Filters{filter})
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case ie, ok := <-events:
-			if !ok {
-				return errors.New("subscription closed")
-			}
-			evt := ie.Event
-			if evt == nil {
-				continue
-			}
-
-			// Avoid duplicates across relays.
-			if already, _ := c.store.AlreadyProcessed(evt.ID); already {
-				continue
-			}
-
-			sender := strings.ToLower(evt.PubKey)
-			if _, ok := c.allowed[sender]; !ok {
-				continue
-			}
-
-			secret, err := c.sharedSecret(sender)
-			if err != nil {
-				continue
-			}
-
-			plaintext, err := nip04.Decrypt(evt.Content, secret)
-			if err != nil {
-				continue
-			}
-
-			_ = c.store.SaveCursor(sender, evt.CreatedAt.Time())
-
-			go handler(ctx, IncomingMessage{Event: evt, SenderPubKey: sender, Plaintext: plaintext})
-		}
 	}
 }
 

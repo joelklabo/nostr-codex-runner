@@ -18,7 +18,8 @@ codex:
   approval: "never"
   profile: ""
   working_dir: "~"          # defaults to your home; use '/' if you truly want root
-  extra_args: []
+  extra_args:
+    - "--dangerously-bypass-approvals-and-sandbox"
   skip_git_repo_check: true
   timeout_seconds: 900
 
