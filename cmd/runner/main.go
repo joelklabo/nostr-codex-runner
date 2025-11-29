@@ -46,6 +46,8 @@ func main() {
 		fatalf("derive pubkey: %v", err)
 	}
 
+	printBanner(cfg, pubKey)
+
 	st, err := store.New(cfg.Storage.Path)
 	if err != nil {
 		fatalf("open store: %v", err)
@@ -195,6 +197,39 @@ func helpText() string {
 		"/status        - show active session\n" +
 		"/help          - show this help\n" +
 		"(any other text runs as a prompt in your active session)"
+}
+
+func printBanner(cfg *config.Config, pubKey string) {
+	if !isTTY() {
+		return
+	}
+
+	cyan := "\033[36m"
+	mag := "\033[35m"
+	gray := "\033[90m"
+	reset := "\033[0m"
+
+	fmt.Printf("%s╔══════════════════════════════════════════════════════╗%s\n", mag, reset)
+	fmt.Printf("%s║%s  nostr-codex-runner                             %s║%s\n", mag, reset, mag, reset)
+	fmt.Printf("%s╠══════════════════════════════════════════════════════╣%s\n", mag, reset)
+	fmt.Printf("%s║%s pubkey  %s%s%s\n", mag, reset, cyan, pubKey, reset)
+	fmt.Printf("%s║%s relays  %s%s%s\n", mag, reset, cyan, strings.Join(cfg.Relays, ", "), reset)
+	uiStatus := "off"
+	if cfg.UI.Enable {
+		uiStatus = fmt.Sprintf("on @ %s", cfg.UI.Addr)
+	}
+	fmt.Printf("%s║%s ui      %s%s%s\n", mag, reset, cyan, uiStatus, reset)
+	fmt.Printf("%s║%s cwd     %s%s%s\n", mag, reset, cyan, cfg.Codex.WorkingDir, reset)
+	fmt.Printf("%s╚══════════════════════════════════════════════════════╝%s\n", mag, reset)
+	fmt.Printf("%sTip:%s DM /help or visit the UI to create issues.\n%s\n", gray, reset, reset)
+}
+
+func isTTY() bool {
+	fi, err := os.Stdout.Stat()
+	if err != nil {
+		return false
+	}
+	return (fi.Mode() & os.ModeCharDevice) != 0
 }
 
 func runRaw(ctx context.Context, cfg *config.Config, command string) string {
