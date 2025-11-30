@@ -1,4 +1,4 @@
-# Pluggable Codex Runner (Nostr example)
+# Pluggable Agent Runner (Nostr example included)
 
 [![CI](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
 [![Release](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
@@ -8,10 +8,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 [![Latest Release](https://img.shields.io/github/v/release/joelklabo/nostr-codex-runner?sort=semver)](https://github.com/joelklabo/nostr-codex-runner/releases/latest)
 
-Always-on bridge that listens for messages, feeds them into an AI agent, and executes optional host actions. Architecture is now pluggable:
-- **Transport**: how messages arrive/leave (Nostr DM, mock; Slack stub included).
-- **Agent**: the model backend (Codex CLI, echo agent, HTTP stub for OpenAI/Claude-style).
-- **Action**: host capabilities (shell, fs read/write; extensible).
+Always-on bridge that listens for messages, feeds them into an AI agent, and executes optional host actions. Architecture is fully pluggable:
+- **Transport**: how messages arrive/leave (built-ins: Nostr DM, mock; Slack stub scaffold).
+- **Agent**: the model backend (built-ins: Codex CLI, echo, HTTP stub for OpenAI/Claude-style).
+- **Action**: host capabilities (built-ins: shell exec, fs read/write; extend with your own).
+The original Nostr Codex Runner is now just one config of this framework.
 
 ## Why
 - Stay keyboard-only and remote: send prompts via Nostr DMs, get Codex replies back as DMs.
@@ -49,8 +50,8 @@ Always-on bridge that listens for messages, feeds them into an AI agent, and exe
 ### Make targets
 - `make run` – start with `config.yaml` (override `CONFIG=...`).
 - `make build` – build to `bin/nostr-codex-runner` (override `BIN=...`).
-- `make test` – run `go test ./...`.
-- `make lint` – `go vet ./...`.
+- `make test` – run unit tests.
+- `make lint` – `go vet ./...` (extra linters run in CI).
 - `make fmt` – `gofmt -w cmd internal`.
 - `make install` – `go install ./cmd/runner`.
 
@@ -119,21 +120,19 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
   launchctl kickstart -k gui/$(id -u)/com.honk.nostr-codex-runner
   ```
 
-## Architecture (short, pluggable)
-- **Nostr client**: subscribes to kind-4 DMs from allowlisted authors to runner pubkey; decrypts via NIP-04; deduplicates per-event ID.
-- **Command router**: parses the mini-DSL; manages per-sender active session stored in BoltDB with idle expiry.
-- **Codex runner**: shells out to `codex exec --json`, captures `thread_id` and latest `agent_message`.
-- **Reply**: sends encrypted DM back with session id and truncated message.
+## Architecture (pluggable core)
+- **Transports**: interface `Start/Send`; register via `internal/transports/registry.go`. Add new packages under `internal/transports/<name>`.
+- **Agents**: interface `Generate`; Codex CLI is default, swap in HTTP/OpenAI/Claude via config.
+- **Actions**: interface `Invoke`; shell/fs included. Register custom actions in `internal/actions`.
+- **Runner**: wires transports→agent→actions, applies allowlists, mini-DSL, retry, session persistence, initial prompts, and max-reply truncation.
+- **Config**: everything is declared in `config.yaml` (`transports[]`, `agent`, `actions[]`), so swapping Nostr→Slack or Codex→HTTP is config-only once the plugin exists.
 
 ## Development
-- Requirements: Go ≥1.22, Codex CLI installed and on PATH.
-- Commands:
-  - `make run` — start the service (uses `config.yaml`).
-  - `make build` — build binary to `bin/nostr-codex-runner`.
-  - `make lint` — `go vet ./...`.
-  - `go test ./...` — run tests (currently none; add as you extend).
+- Requirements: Go ≥1.22, Codex CLI installed and on PATH for the Codex agent; other agents may have their own deps.
+- Commands: `make run`, `make build`, `make test`, `make lint`, `make fmt`, `make install`.
+- CI extras: coverage, staticcheck, misspell+gofmt, govulncheck, gosec, docker build, release.
 - Formatting: `gofmt -w` on Go files before committing.
-- Issue workflow: use `bd` (`bd create --parent nostr-codex-runner-2zo ...`) and close issues with a commit per issue.
+- Issue workflow: use `bd` (`bd create --parent nostr-codex-runner-2zo ...`) and close issues with one commit per issue.
 
 ## Security
 - Keep `config.yaml` and keys private (already in `.gitignore`).
