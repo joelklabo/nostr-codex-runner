@@ -1,4 +1,4 @@
-# Nostr Codex Runner
+# Pluggable Codex Runner (Nostr example)
 
 [![CI](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
 [![Release](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
@@ -6,7 +6,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 [![Latest Release](https://img.shields.io/github/v/release/joelklabo/nostr-codex-runner?sort=semver)](https://github.com/joelklabo/nostr-codex-runner/releases/latest)
 
-Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and feeds them into `codex exec`, keeping Codex session threads alive so you can work entirely over Nostr.
+Always-on bridge that listens for messages, feeds them into an AI agent, and executes optional host actions. Architecture is now pluggable:
+- **Transport**: how messages arrive/leave (Nostr DM, mock; Slack stub included).
+- **Agent**: the model backend (Codex CLI, echo agent, HTTP stub for OpenAI/Claude-style).
+- **Action**: host capabilities (shell, fs read/write; extensible).
 
 ## Why
 - Stay keyboard-only and remote: send prompts via Nostr DMs, get Codex replies back as DMs.
@@ -21,7 +24,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
 - `/help` — recap commands.
 - _Anything else_ — treated as a prompt and executed in your active session (or a new one if none).
 
-## Quick start
+## Quick start (Nostr + Codex example)
 1. Copy `config.example.yaml` → `config.yaml` and fill secrets:
    - `runner.private_key` — hex Nostr secret key (nsec).
    - `runner.allowed_pubkeys` — list of pubkeys allowed to control the runner.
@@ -39,7 +42,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
    List the last 5 git commits in this repo.
    /status
    ```
-4. Responses include `session: <thread-id>` plus the latest Codex message (truncated to `max_reply_chars`).
+4. Responses include `session: <thread-id>` plus the latest model message (truncated to `max_reply_chars`).
 
 ### Make targets
 - `make run` – start with `config.yaml` (override `CONFIG=...`).
@@ -62,7 +65,7 @@ Always-on bridge that listens for Nostr encrypted DMs from trusted pubkeys and f
  - Full-access Codex: config sets `sandbox: danger-full-access`, `approval: never`, and `extra_args: ["--dangerously-bypass-approvals-and-sandbox"]` to give the agent unrestricted system access. Keep this only on trusted machines.
 
 ## Running it remotely / outside your LAN
-The runner only needs outbound internet to talk to Nostr relays. If you want shell-level access when away from home, rely on `/raw` over DMs or your own VPN/Tailscale/SSH setup; there is no web UI anymore.
+The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/raw` or your own VPN/Tailscale/SSH setup; there is no web UI.
 
 ## Quick links
 - [Releases](https://github.com/joelklabo/nostr-codex-runner/releases)
@@ -70,9 +73,9 @@ The runner only needs outbound internet to talk to Nostr relays. If you want she
 - [CI workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
 - [Release workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
 
-## Configuration reference
+## Configuration reference (plugins)
 `config.example.yaml` documents every field. Key knobs:
-- `relays`: list of relay URLs to connect to.
+- `transports[]: list of transports. Example (Nostr): see config.example.yaml; legacy relays still default to nostr.
 - `runner.allowed_pubkeys`: access control.
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
 - `codex.*`: CLI flags for Codex (sandbox, approval policy, working dir (defaults to your home), extra args, timeout).
@@ -114,7 +117,7 @@ The runner only needs outbound internet to talk to Nostr relays. If you want she
   launchctl kickstart -k gui/$(id -u)/com.honk.nostr-codex-runner
   ```
 
-## Architecture (short)
+## Architecture (short, pluggable)
 - **Nostr client**: subscribes to kind-4 DMs from allowlisted authors to runner pubkey; decrypts via NIP-04; deduplicates per-event ID.
 - **Command router**: parses the mini-DSL; manages per-sender active session stored in BoltDB with idle expiry.
 - **Codex runner**: shells out to `codex exec --json`, captures `thread_id` and latest `agent_message`.
