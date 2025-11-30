@@ -20,6 +20,8 @@ var (
 	bucketMessages  = []byte("messages")
 	bucketHistory   = []byte("history")
 	bucketAudit     = []byte("audit")
+
+	auditMaxEntries = 200
 )
 
 // SessionState represents the current Codex session for a sender.
@@ -243,10 +245,8 @@ func (s *Store) History(threadID string, maxEntries int) ([]json.RawMessage, err
 }
 
 // AppendAudit records an action execution entry.
-func (s *Store) AppendAudit(action, sender, outcome string, dur time.Duration, maxEntries int) error {
-	if maxEntries <= 0 {
-		maxEntries = 200
-	}
+func (s *Store) AppendAudit(action, sender, outcome string, dur time.Duration) error {
+	maxEntries := auditMaxEntries
 	type auditEntry struct {
 		Action   string    `json:"action"`
 		Sender   string    `json:"sender"`

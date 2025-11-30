@@ -27,14 +27,17 @@ func TestHistoryAppendAndTrim(t *testing.T) {
 func TestAuditAppend(t *testing.T) {
 	st, cleanup := newTempStore(t)
 	defer cleanup()
+	oldMax := auditMaxEntries
+	auditMaxEntries = 2
+	defer func() { auditMaxEntries = oldMax }()
 
-	if err := st.AppendAudit("action", "sender", "ok", 0, 2); err != nil {
+	if err := st.AppendAudit("action", "sender", "ok", 0); err != nil {
 		t.Fatalf("append audit: %v", err)
 	}
-	if err := st.AppendAudit("action", "sender", "ok2", 0, 2); err != nil {
+	if err := st.AppendAudit("action", "sender", "ok2", 0); err != nil {
 		t.Fatalf("append audit: %v", err)
 	}
-	if err := st.AppendAudit("action", "sender", "ok3", 0, 2); err != nil {
+	if err := st.AppendAudit("action", "sender", "ok3", 0); err != nil {
 		t.Fatalf("append audit: %v", err)
 	}
 	entries, err := st.Audit(10)
