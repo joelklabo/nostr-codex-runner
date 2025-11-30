@@ -22,7 +22,11 @@ func TestBuildWithMockEcho(t *testing.T) {
 	if err != nil {
 		t.Fatalf("store: %v", err)
 	}
-	t.Cleanup(func() { st.Close() })
+	t.Cleanup(func() {
+		if err := st.Close(); err != nil {
+			t.Errorf("close store: %v", err)
+		}
+	})
 
 	r, err := Build(cfg, st, nil)
 	if err != nil {
@@ -31,8 +35,15 @@ func TestBuildWithMockEcho(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go r.Start(ctx)
+
+	errCh := make(chan error, 1)
+	go func() { errCh <- r.Start(ctx) }()
+
 	// let it start then cancel
 	time.Sleep(20 * time.Millisecond)
 	cancel()
+
+	if err := <-errCh; err != nil && err != context.Canceled {
+		t.Fatalf("runner err: %v", err)
+	}
 }

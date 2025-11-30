@@ -48,7 +48,9 @@ func (r *ReadFile) Invoke(ctx context.Context, args json.RawMessage) (json.RawMe
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	limited := io.LimitReader(f, r.cfg.MaxBytes+1)
 	data, err := io.ReadAll(limited)

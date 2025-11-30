@@ -11,7 +11,9 @@ import (
 func TestReadFileAllowed(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "f.txt")
-	os.WriteFile(p, []byte("hello"), 0o644)
+	if err := os.WriteFile(p, []byte("hello"), 0o644); err != nil {
+		t.Fatalf("write seed file: %v", err)
+	}
 
 	act := NewReadFile(Config{Roots: []string{dir}})
 	args, _ := json.Marshal(map[string]string{"path": p})
@@ -41,7 +43,10 @@ func TestWriteFileAllowed(t *testing.T) {
 	if _, err := act.Invoke(context.Background(), args); err != nil {
 		t.Fatalf("write err: %v", err)
 	}
-	data, _ := os.ReadFile(p)
+	data, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatalf("read file: %v", err)
+	}
 	if string(data) != "ok" {
 		t.Fatalf("unexpected data: %s", data)
 	}
