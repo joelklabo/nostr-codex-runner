@@ -1,4 +1,4 @@
-.PHONY: run build lint test fmt install
+.PHONY: run build lint lint-ci test fmt install verify
 
 CONFIG ?= config.yaml
 BIN ?= bin/nostr-codex-runner
@@ -11,6 +11,10 @@ build:
 
 lint:
 	go vet ./...
+
+lint-ci:
+	@command -v golangci-lint >/dev/null 2>&1 || (echo "golangci-lint not installed; install with 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest'"; exit 1)
+	golangci-lint run --modules-download-mode=mod --timeout=5m ./...
 
 test:
 	go test ./...

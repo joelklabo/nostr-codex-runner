@@ -127,6 +127,27 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - **Runner**: wires transports→agent→actions, applies allowlists, mini-DSL, retry, session persistence, initial prompts, and max-reply truncation.
 - **Config**: everything is declared in `config.yaml` (`transports[]`, `agent`, `actions[]`), so swapping Nostr→Slack or Codex→HTTP is config-only once the plugin exists.
 
+### Adding your own plugins
+- Create a new folder under `internal/transports|agents|actions/<yourname>`, implement the interface, and call `registry.MustRegister` in `init()`.
+- Add a config stanza referencing `type: "<yourname>"` and any custom fields you need.
+- Extend `internal/app/build.go` to wire config → constructor.
+
+### Slack stub config example (transport swap)
+```yaml
+transports:
+  - type: slack
+    id: slack
+    token: "xoxb-..."          # to be implemented in slack transport
+agent:
+  type: echo
+actions:
+  - type: shell
+projects:
+  - id: default
+    path: .
+    name: default
+```
+
 ## Development
 - Requirements: Go ≥1.22, Codex CLI installed and on PATH for the Codex agent; other agents may have their own deps.
 - Commands: `make run`, `make build`, `make test`, `make lint`, `make fmt`, `make install`.
