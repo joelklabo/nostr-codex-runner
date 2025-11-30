@@ -1,12 +1,13 @@
 package core
 
 import (
-    "context"
-    "errors"
-    "fmt"
-    "log/slog"
-    "sync"
-    "time"
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"strings"
+	"sync"
+	"time"
 )
 
 // Runner wires transports, agent, and actions together.
@@ -20,6 +21,16 @@ type Runner struct {
 
 	reqTimeout    time.Duration
 	actionTimeout time.Duration
+
+	allowedActions map[string]struct{}
+	allowedSenders map[string]struct{}
+
+	auditStore AuditLogger
+}
+
+// AuditLogger records action executions.
+type AuditLogger interface {
+	AppendAudit(action, sender, outcome string, dur time.Duration) error
 }
 
 // RunnerOption configures a Runner.
@@ -33,6 +44,29 @@ func WithRequestTimeout(d time.Duration) RunnerOption {
 // WithActionTimeout overrides the per-action timeout.
 func WithActionTimeout(d time.Duration) RunnerOption {
 	return func(r *Runner) { r.actionTimeout = d }
+}
+
+// WithAllowedActions sets a whitelist of action names; empty means allow all.
+func WithAllowedActions(names []string) RunnerOption {
+	set := make(map[string]struct{}, len(names))
+	for _, n := range names {
+		set[n] = struct{}{}
+	}
+	return func(r *Runner) { r.allowedActions = set }
+}
+
+// WithAllowedSenders sets allowed sender ids; empty means allow all.
+func WithAllowedSenders(ids []string) RunnerOption {
+	set := make(map[string]struct{}, len(ids))
+	for _, n := range ids {
+		set[strings.ToLower(n)] = struct{}{}
+	}
+	return func(r *Runner) { r.allowedSenders = set }
+}
+
+// WithAuditLogger wires an audit sink.
+func WithAuditLogger(a AuditLogger) RunnerOption {
+	return func(r *Runner) { r.auditStore = a }
 }
 
 // NewRunner constructs a Runner. If logger is nil, slog.Default is used.
@@ -101,17 +135,17 @@ func (r *Runner) Start(ctx context.Context) error {
 	wg.Wait()
 
 	select {
-    case err := <-errCh:
-        if errors.Is(err, context.Canceled) {
-            return nil
-        }
-        return err
-    default:
-        if errors.Is(ctx.Err(), context.Canceled) {
-            return nil
-        }
-        return ctx.Err()
-    }
+	case err := <-errCh:
+		if errors.Is(err, context.Canceled) {
+			return nil
+		}
+		return err
+	default:
+		if errors.Is(ctx.Err(), context.Canceled) {
+			return nil
+		}
+		return ctx.Err()
+	}
 }
 
 func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
@@ -120,6 +154,13 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 		slog.String("sender", msg.Sender),
 		slog.String("thread", msg.ThreadID),
 	)
+
+	if len(r.allowedSenders) > 0 {
+		if _, ok := r.allowedSenders[strings.ToLower(msg.Sender)]; !ok {
+			log.Warn("sender not allowed")
+			return
+		}
+	}
 
 	reqCtx := parent
 	if r.reqTimeout > 0 {
@@ -146,6 +187,13 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 	// Execute actions if any
 	var actionResults []string
 	for _, call := range resp.ActionCalls {
+		if len(r.allowedActions) > 0 {
+			if _, ok := r.allowedActions[call.Name]; !ok {
+				log.Warn("action not allowed", slog.String("action", call.Name))
+				r.logAudit(call.Name, msg.Sender, "denied", 0)
+				continue
+			}
+		}
 		act, ok := r.actions[call.Name]
 		if !ok {
 			log.Warn("unknown action", slog.String("action", call.Name))
@@ -161,9 +209,11 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 		out, err := act.Invoke(aCtx, call.Args)
 		if err != nil {
 			log.Error("action error", slog.String("action", call.Name), slog.String("err", err.Error()))
+			r.logAudit(call.Name, msg.Sender, "error", time.Since(aStart))
 			continue
 		}
 		log.Info("action ok", slog.String("action", call.Name), slog.Duration("ms", time.Since(aStart)))
+		r.logAudit(call.Name, msg.Sender, "ok", time.Since(aStart))
 		if len(out) > 0 {
 			actionResults = append(actionResults, fmt.Sprintf("[%s]\n%s", call.Name, string(out)))
 		}
@@ -237,4 +287,11 @@ func (r *Runner) sendWithRetry(ctx context.Context, tr Transport, msg OutboundMe
 		return sendErr
 	}
 	return nil
+}
+
+func (r *Runner) logAudit(action, sender, outcome string, dur time.Duration) {
+	if r.auditStore == nil {
+		return
+	}
+	_ = r.auditStore.AppendAudit(action, sender, outcome, dur)
 }
