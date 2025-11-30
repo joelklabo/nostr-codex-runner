@@ -168,6 +168,16 @@ func (s *Store) AlreadyProcessed(id string) (bool, error) {
 	return existed, err
 }
 
+// MarkProcessed marks an event ID as processed without checking existence.
+func (s *Store) MarkProcessed(id string) error {
+	if id == "" {
+		return errors.New("empty event id")
+	}
+	return s.db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket(bucketProcessed).Put([]byte(id), []byte{1})
+	})
+}
+
 // RecentMessageSeen returns true if the same sender/plaintext was seen within the window.
 // It also records the current occurrence.
 func (s *Store) RecentMessageSeen(sender, plaintext string, window time.Duration) (bool, error) {

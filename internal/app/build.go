@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"nostr-codex-runner/internal/action/fs"
 	"nostr-codex-runner/internal/action/shell"
@@ -67,6 +68,10 @@ func Build(cfg *config.Config, st *store.Store, logger *slog.Logger) (*core.Runn
 
 	r := core.NewRunner(transports, agent, actions, logger,
 		core.WithAllowedSenders(cfg.Runner.AllowedPubkeys),
+		core.WithStore(st),
+		core.WithSessionTimeout(time.Duration(cfg.Runner.SessionTimeoutMins)*time.Minute),
+		core.WithInitialPrompt(cfg.Runner.InitialPrompt),
+		core.WithMaxReplyChars(cfg.Runner.MaxReplyChars),
 	)
 	return r, nil
 }
