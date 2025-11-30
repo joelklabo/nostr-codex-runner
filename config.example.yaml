@@ -39,3 +39,36 @@ projects:
   - id: "default"
     name: "Nostr Codex Runner"
     path: "."
+
+# Plugin-based config (defaults derived from above if omitted)
+transports:
+  - type: "nostr"
+    id: "nostr"
+    relays:
+      - wss://relay.damus.io
+      - wss://relay.snort.social
+      - wss://relay.nostr.band
+    private_key: ""          # hex
+    allowed_pubkeys:
+      - ""
+
+agent:
+  type: "codexcli"
+  codex:
+    binary: "codex"
+    sandbox: "danger-full-access"
+    approval: "never"
+    profile: ""
+    working_dir: "~"
+    extra_args:
+      - "--dangerously-bypass-approvals-and-sandbox"
+    skip_git_repo_check: true
+    timeout_seconds: 900
+
+actions:
+  - type: "shell"
+    name: "shell"
+    workdir: "~"
+    allowed: []
+    timeout_seconds: 120
+    max_output: 8000

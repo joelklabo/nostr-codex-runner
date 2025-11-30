@@ -20,6 +20,10 @@ type Config struct {
 	Storage  StorageConfig `yaml:"storage"`
 	Logging  LoggingConfig `yaml:"logging"`
 	Projects []Project     `yaml:"projects"`
+
+	Transports []TransportConfig `yaml:"transports"`
+	Agent      AgentConfig       `yaml:"agent"`
+	Actions    []ActionConfig    `yaml:"actions"`
 }
 
 // RunnerConfig controls Nostr-facing behaviour.
@@ -62,6 +66,39 @@ type Project struct {
 	ID   string `yaml:"id"`
 	Name string `yaml:"name"`
 	Path string `yaml:"path"`
+}
+
+// TransportConfig is a generic transport entry.
+type TransportConfig struct {
+	Type string `yaml:"type"`
+	ID   string `yaml:"id"`
+
+	// Nostr-specific fields (used when type=nostr)
+	Relays         []string `yaml:"relays"`
+	PrivateKey     string   `yaml:"private_key"`
+	AllowedPubkeys []string `yaml:"allowed_pubkeys"`
+}
+
+// AgentConfig holds agent selection and backend config.
+type AgentConfig struct {
+	Type string `yaml:"type"`
+	// Codex CLI fields (type=codexcli)
+	Codex CodexConfig `yaml:"codex"`
+}
+
+// ActionConfig defines an action plugin instance.
+type ActionConfig struct {
+	Type         string   `yaml:"type"`
+	Name         string   `yaml:"name"`
+	Workdir      string   `yaml:"workdir"`
+	Allowed      []string `yaml:"allowed"`
+	TimeoutSecs  int      `yaml:"timeout_seconds"`
+	MaxOutput    int      `yaml:"max_output"`
+	Roots        []string `yaml:"roots"`
+	AllowWrite   bool     `yaml:"allow_write"`
+	MaxBytes     int64    `yaml:"max_bytes"`
+	Capabilities []string `yaml:"capabilities"`
+	Description  string   `yaml:"description"`
 }
 
 // Load reads and validates configuration from the provided path.
@@ -201,6 +238,31 @@ func (c *Config) applyDefaults(baseDir string) {
 	// Normalize allowed pubkeys to lowercase hex.
 	for i, pk := range c.Runner.AllowedPubkeys {
 		c.Runner.AllowedPubkeys[i] = normalizePubkey(pk)
+	}
+
+	// Defaults for plugin schema (backward compat)
+	if len(c.Transports) == 0 {
+		c.Transports = []TransportConfig{{
+			Type:           "nostr",
+			ID:             "nostr",
+			Relays:         c.Relays,
+			PrivateKey:     c.Runner.PrivateKey,
+			AllowedPubkeys: c.Runner.AllowedPubkeys,
+		}}
+	}
+	if c.Agent.Type == "" {
+		c.Agent.Type = "codexcli"
+		c.Agent.Codex = c.Codex
+	}
+	if len(c.Actions) == 0 {
+		c.Actions = []ActionConfig{{
+			Type:        "shell",
+			Name:        "shell",
+			Workdir:     c.Codex.WorkingDir,
+			TimeoutSecs: c.Codex.TimeoutSeconds,
+			MaxOutput:   c.Runner.MaxReplyChars,
+			Allowed:     []string{},
+		}}
 	}
 }
 
