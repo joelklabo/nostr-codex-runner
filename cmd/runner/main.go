@@ -23,7 +23,6 @@ import (
 )
 
 var (
-	processStart = time.Now()
 	buildVer     = "dev"
 	hostName     = "unknown"
 	runnerPID    = os.Getpid()
