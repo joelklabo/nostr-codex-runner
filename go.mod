@@ -1,6 +1,6 @@
 module nostr-codex-runner
 
-go 1.24.1
+go 1.24.10
 
 require (
 	github.com/nbd-wtf/go-nostr v0.52.3
