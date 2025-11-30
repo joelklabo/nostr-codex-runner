@@ -67,7 +67,7 @@ Always-on bridge that listens for messages, feeds them into an AI agent, and exe
  - Full-access Codex: config sets `sandbox: danger-full-access`, `approval: never`, and `extra_args: ["--dangerously-bypass-approvals-and-sandbox"]` to give the agent unrestricted system access. Keep this only on trusted machines.
 
 ## Running it remotely / outside your LAN
-The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/raw` or your own VPN/Tailscale/SSH setup; there is no web UI.
+The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/raw` or your own VPN/Tailscale/SSH setup; there is no web UI. Optional health endpoint: run with `-health-listen 127.0.0.1:8081` for `/health` JSON.
 
 ## Quick links
 - [Releases](https://github.com/joelklabo/nostr-codex-runner/releases)
@@ -82,7 +82,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
 - `codex.*`: CLI flags for Codex (sandbox, approval policy, working dir (defaults to your home), extra args, timeout).
 - `storage.path`: BoltDB file for state.
-- `logging.level`: `debug|info|warn|error`.
+- `logging.level`: `debug|info|warn|error`; `logging.format`: `text|json`.
 
 ## Background service (macOS-friendly)
 - tmux: `tmux new -s codex-runner 'cd /Users/honk/code/nostr-codex-runner && make run'`

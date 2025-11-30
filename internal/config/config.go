@@ -57,8 +57,9 @@ type StorageConfig struct {
 
 // LoggingConfig controls log level.
 type LoggingConfig struct {
-	Level string `yaml:"level"`
-	File  string `yaml:"file"`
+	Level  string `yaml:"level"`
+	File   string `yaml:"file"`
+	Format string `yaml:"format"`
 }
 
 // Project represents a bd workspace (path containing a .beads dir).
@@ -136,20 +137,23 @@ func (c *Config) GetRunnerPubKey() (string, error) {
 
 // Validate ensures the config is usable.
 func (c *Config) Validate() error {
-	if len(c.Relays) == 0 {
-		return errors.New("at least one relay is required")
-	}
 	if c.Runner.PrivateKey == "" {
 		return errors.New("runner.private_key is required")
 	}
 	if len(c.Runner.AllowedPubkeys) == 0 {
 		return errors.New("runner.allowed_pubkeys must contain at least one key")
 	}
-	if c.Codex.Binary == "" {
-		return errors.New("codex.binary is required (e.g., 'codex')")
-	}
 	if c.Storage.Path == "" {
 		return errors.New("storage.path is required")
+	}
+	if len(c.Transports) == 0 {
+		return errors.New("at least one transport is required")
+	}
+	if c.Agent.Type == "" {
+		return errors.New("agent.type is required")
+	}
+	if len(c.Actions) == 0 {
+		return errors.New("at least one action is required")
 	}
 	if len(c.Projects) == 0 {
 		return errors.New("at least one project must be configured")
@@ -199,6 +203,9 @@ func (c *Config) applyDefaults(baseDir string) {
 	}
 	if c.Logging.Level == "" {
 		c.Logging.Level = "info"
+	}
+	if c.Logging.Format == "" {
+		c.Logging.Format = "text"
 	}
 	if c.Logging.File == "" {
 		if home, err := os.UserHomeDir(); err == nil {
