@@ -27,7 +27,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.6.2
+          version: latest
           install-mode: go   # build with the configured Go toolchain to match stdlib export data
           skip-cache: true
           args: --modules-download-mode=mod ./...
