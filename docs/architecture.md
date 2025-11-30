@@ -25,14 +25,14 @@ Core runner (in `internal/core/runner.go`):
 4. Runner sends `OutboundMessage` via the same transport.
 
 Registries:
-- `internal/transport/registry.go`
-- `internal/agent/registry.go`
-- `internal/action/registry.go`
+- `internal/transportss/registry.go`
+- `internal/agentss/registry.go`
+- `internal/actionss/registry.go`
 
 Built-in implementations:
-- Transports: Nostr DM (`internal/transport/nostr`), Mock (`internal/transport/mock`), Slack stub (`internal/transport/slack`).
-- Agents: Codex CLI (`internal/agent/codexcli`), Echo (`internal/agent/echo`), HTTP stub (`internal/agent/http`).
-- Actions: Shell (`internal/action/shell`), FS read/write (`internal/action/fs`).
+- Transports: Nostr DM (`internal/transportss/nostr`), Mock (`internal/transportss/mock`), Slack stub (`internal/transportss/slack`).
+- Agents: Codex CLI (`internal/agentss/codexcli`), Echo (`internal/agentss/echo`), HTTP stub (`internal/agentss/http`).
+- Actions: Shell (`internal/actionss/shell`), FS read/write (`internal/actionss/fs`).
 
 Configuration (see `config.example.yaml` and `configs/` samples):
 - `transports[]`: `{type,id,...}` e.g., nostr/more fields per type.
@@ -48,6 +48,6 @@ Main wiring:
 - `cmd/runner/main.go` loads config, opens Bolt store, builds runner, and starts it.
 
 Extending:
-- Add a transport: implement `core.Transport`, register constructor in a new package under `internal/transport/<name>`, and extend config parsing.
+- Add a transport: implement `core.Transport`, register constructor in a new package under `internal/transportss/<name>`, and extend config parsing.
 - Add an agent: implement `core.Agent` and register; shape `AgentResponse.ActionCalls` to request tools.
 - Add an action: implement `core.Action`, register, and add config schema; declare capabilities.

@@ -5,16 +5,16 @@ import (
 	"log/slog"
 	"time"
 
-	"nostr-codex-runner/internal/action/fs"
-	"nostr-codex-runner/internal/action/shell"
-	"nostr-codex-runner/internal/agent/codexcli"
-	"nostr-codex-runner/internal/agent/echo"
-	"nostr-codex-runner/internal/agent/http"
+	"nostr-codex-runner/internal/actions/fs"
+	"nostr-codex-runner/internal/actions/shell"
+	"nostr-codex-runner/internal/agents/codexcli"
+	"nostr-codex-runner/internal/agents/echo"
+	"nostr-codex-runner/internal/agents/http"
 	"nostr-codex-runner/internal/config"
 	"nostr-codex-runner/internal/core"
 	"nostr-codex-runner/internal/store"
-	tmock "nostr-codex-runner/internal/transport/mock"
-	tnostr "nostr-codex-runner/internal/transport/nostr"
+	tmock "nostr-codex-runner/internal/transports/mock"
+	tnostr "nostr-codex-runner/internal/transports/nostr"
 )
 
 // Build constructs transports, agent, and actions from config.
