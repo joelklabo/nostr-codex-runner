@@ -62,7 +62,3 @@ func (t *Transport) Send(ctx context.Context, msg core.OutboundMessage) error {
 	}
 	return t.client.SendReply(ctx, msg.Recipient, msg.Text)
 }
-
-func init() {
-	// Allow registry registration when imported via blank import.
-}
