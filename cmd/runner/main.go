@@ -26,11 +26,17 @@ var (
 	buildVer     = "dev"
 	hostName     = "unknown"
 	runnerPID    = os.Getpid()
+	versionFlag  = flag.Bool("version", false, "Print version and exit")
 )
 
 func main() {
 	configPath := flag.String("config", "config.yaml", "Path to config.yaml")
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("%s\n", buildVersion())
+		return
+	}
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
