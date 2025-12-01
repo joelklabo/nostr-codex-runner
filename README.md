@@ -4,6 +4,8 @@
 
 Binary-first, wizard-assisted CLI that turns messages (Nostr by default, mock offline) into agent actions in minutes.
 
+Inspired by [warelay](https://github.com/steipete/warelay) for a clean relay-first developer experience.
+
 [![CI](https://github.com/joelklabo/buddy/actions/workflows/ci.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/ci.yml)
 [![Release](https://github.com/joelklabo/buddy/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/release.yml)
 [![Coverage](https://github.com/joelklabo/buddy/actions/workflows/coverage.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/coverage.yml)
