@@ -15,6 +15,14 @@ Always-on bridge that listens for messages, feeds them into an AI agent, and exe
 - **Action**: host capabilities (built-ins: shell exec, fs read/write; extend with your own).
 The original Nostr Codex Runner is now just one config of this framework.
 
+## Project layout (where plugins live)
+- Transports: `internal/transports/<name>` (nostr, mock, slack stub)
+- Agents: `internal/agents/<name>` (codexcli, copilotcli, echo, http stub)
+- Actions: `internal/actions/<name>` (shell, fs read/write)
+- Core runner/router: `internal/core`, `internal/commands`
+- App wiring: `internal/app/build.go` (reads `config.yaml` and instantiates plugins)
+See [Plugin catalog](docs/plugins/README.md) for the current list and how to add more.
+
 ## Why
 - Stay keyboard-only and remote: send prompts via Nostr DMs, get Codex replies back as DMs.
 - Keep conversation context: runner tracks Codex `thread_id` per sender and resumes automatically.
