@@ -12,7 +12,7 @@
 ## Quick install
 
 ```bash
-brew install joelklabo/tap/buddy           # Homebrew (macOS/Linux) – tap name TBD after publish
+brew install joelklabo/tap/buddy           # Homebrew (macOS/Linux)
 # or
 curl -fsSL https://get.buddy.sh | sh       # script installer (downloads release, verifies checksum)
 ```
@@ -37,6 +37,8 @@ buddy run nostr-copilot-shell              # Copilot + shell action (trusted ope
 buddy run path/to/config.yaml              # argv beats env/cwd
 ```
 
+Expected output: a short startup banner then streaming logs; stop with Ctrl+C.
+
 ## What it does
 - **Transport**: nostr DMs (default) or mock; more transports are pluggable.
 - **Agent**: codexcli, copilotcli, HTTP (Claude/OpenAI style), echo, local endpoints.
@@ -56,7 +58,7 @@ buddy help                     show help
 1) argv `-config` path (or positional in future)
 2) `./config.yaml`
 3) `~/.config/buddy/config.yaml`
-4) Legacy: `NCR_CONFIG` env and `~/.config/nostr-codex-runner/config.yaml` (warned)
+4) Legacy: `NCR_CONFIG` env and `~/.config/nostr-codex-runner/config.yaml` (supported with warning for one release)
 
 ## Docs
 - Docs index: `docs/index-ia.md` (user vs contributor landing) – to be published
@@ -70,6 +72,7 @@ buddy help                     show help
 - Issues tracked with `bd` (epic `nostr-codex-runner-3oa`); one commit per issue.
 - Go 1.24+, `go test ./...` before pushing.
 - See `CONTRIBUTING.md` and `docs/style-guide.md`.
+- New here? Try `buddy run mock-echo`, then open a PR with your first improvement. Friendly reviews welcome.
 
 ## License
 MIT
