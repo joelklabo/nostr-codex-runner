@@ -81,6 +81,7 @@ func runContext(parent context.Context, args []string) error {
 	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml (defaults: BUDDY_CONFIG env, ./config.yaml, ~/.config/buddy/config.yaml)")
 	healthListen := fs.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
 	metricsListen := fs.String("metrics-listen", "", "Optional Prometheus metrics listen addr (e.g., 127.0.0.1:9090)")
+	skipCheck := fs.Bool("skip-check", false, "Skip dependency preflight")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func runContext(parent context.Context, args []string) error {
 	ctx, stop := signal.NotifyContext(parent, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	cfg, _, err := loadConfigWithPresets(*configPath, positional)
+	cfg, presetName, err := loadConfigWithPresets(*configPath, positional)
 	if err != nil {
 		return err
 	}
@@ -125,6 +126,12 @@ func runContext(parent context.Context, args []string) error {
 			logger.Error("failed to close store", slog.String("err", err.Error()))
 		}
 	}()
+
+	if !*skipCheck {
+		if err := runDepPreflight(cfg, presetName); err != nil {
+			return err
+		}
+	}
 
 	runner, err := app.Build(cfg, st, logger)
 	if err != nil {
