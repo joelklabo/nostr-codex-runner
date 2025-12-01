@@ -106,7 +106,7 @@ These are all composable—pick any transport + one agent + any actions in `conf
 
 ## Running it remotely / outside your LAN
 
-The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/shell` (if enabled) or your own VPN/Tailscale/SSH setup; there is no web UI. Optional health endpoint: run with `-health-listen 127.0.0.1:8081` for `/health` JSON.
+The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/shell` (if enabled) or your own VPN/Tailscale/SSH setup; there is no web UI. Optional endpoints: run with `-health-listen 127.0.0.1:8081` for `/health` JSON, and `-metrics-listen 127.0.0.1:9090` for Prometheus metrics.
 
 ## Quick links
 
