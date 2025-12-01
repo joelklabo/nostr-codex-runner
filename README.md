@@ -129,7 +129,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - `storage.path`: BoltDB file for state.
 - `logging.level`: `debug|info|warn|error`; `logging.format`: `text|json`.
 
-## Background service (macOS-friendly)
+## Background service
 
 - tmux: `tmux new -s codex-runner 'cd /Users/honk/code/nostr-codex-runner && make run'`
 - launchd (recommended for "always on"): Create a plist file at `~/Library/LaunchAgents/com.honk.nostr-codex-runner.plist` with your configuration. Make sure Codex and Node are on PATH (Homebrew defaults live in `/opt/homebrew/bin`). Either set `codex.binary` in `config.yaml` to an absolute path or pass PATH via the plist `EnvironmentVariables` dict. Load/restart with:
@@ -138,6 +138,16 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.honk.nostr-codex-runner.plist
   launchctl kickstart -k gui/$(id -u)/com.honk.nostr-codex-runner
   ```
+- systemd (Linux): use the template at `scripts/systemd/nostr-codex-runner.service`. Example:
+
+  ```bash
+  # copy and edit the service to point at your user + config path
+  sudo cp scripts/systemd/nostr-codex-runner.service /etc/systemd/system/nostr-codex-runner@youruser.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now nostr-codex-runner@youruser.service
+  ```
+
+  The unit defaults to `ExecStart=%h/.local/bin/nostr-codex-runner run -config $NCR_CONFIG` and `NCR_CONFIG=%h/.config/nostr-codex-runner/config.yaml`; adjust if you install elsewhere.
 
 ## Architecture (pluggable core)
 
