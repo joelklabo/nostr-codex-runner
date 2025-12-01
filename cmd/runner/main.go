@@ -16,6 +16,7 @@ import (
 	"nostr-codex-runner/internal/app"
 	"nostr-codex-runner/internal/config"
 	"nostr-codex-runner/internal/health"
+	"nostr-codex-runner/internal/metrics"
 	"nostr-codex-runner/internal/store"
 	"runtime"
 	"runtime/debug"
@@ -51,6 +52,7 @@ func runContext(parent context.Context, args []string) error {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml")
 	healthListen := fs.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
+	metricsListen := fs.String("metrics-listen", "", "Optional Prometheus metrics listen addr (e.g., 127.0.0.1:9090)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -96,6 +98,9 @@ func runContext(parent context.Context, args []string) error {
 		if _, err := health.Start(ctx, *healthListen, buildVer, logger); err != nil {
 			return fmt.Errorf("start health: %w", err)
 		}
+	}
+	if err := metrics.Start(ctx, *metricsListen, logger); err != nil {
+		return fmt.Errorf("start metrics: %w", err)
 	}
 
 	logger.Info("nostr-codex-runner starting")

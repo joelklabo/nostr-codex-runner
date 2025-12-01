@@ -4,6 +4,7 @@
 [![Release](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
 [![Coverage](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/coverage.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/coverage.yml)
 [![Staticcheck](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/staticcheck.yml/badge.svg)](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/staticcheck.yml)
+[![Go](https://img.shields.io/badge/go-1.24%2B-00ADD8)](https://go.dev/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/joelklabo/nostr-codex-runner.svg)](https://pkg.go.dev/github.com/joelklabo/nostr-codex-runner)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 [![Latest Release](https://img.shields.io/github/v/release/joelklabo/nostr-codex-runner?sort=semver)](https://github.com/joelklabo/nostr-codex-runner/releases/latest)

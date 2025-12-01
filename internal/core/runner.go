@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"nostr-codex-runner/internal/commands"
+	"nostr-codex-runner/internal/metrics"
 	"nostr-codex-runner/internal/store"
 )
 
@@ -133,6 +134,11 @@ func NewRunner(transports []Transport, agent Agent, actions []Action, logger *sl
 	return r
 }
 
+// Transports exposes the configured transports (useful for tests).
+func (r *Runner) Transports() []Transport {
+	return r.transports
+}
+
 // Start launches transports and processes inbound messages until ctx is done.
 func (r *Runner) Start(ctx context.Context) error {
 	inbound := make(chan InboundMessage, 128)
@@ -156,6 +162,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	}()
 
 	for msg := range inbound {
+		metrics.IncInbound()
 		r.handleMessage(ctx, msg)
 	}
 
@@ -219,6 +226,7 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 	resp, err := r.callAgentWithRetry(reqCtx, req, log)
 	if err != nil {
 		log.Error("agent error", slog.String("err", err.Error()))
+		metrics.IncAgentError()
 		return
 	}
 	log.Info("agent reply", slog.Duration("ms", time.Since(start)))
@@ -249,10 +257,12 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 		if err != nil {
 			log.Error("action error", slog.String("action", call.Name), slog.String("err", err.Error()))
 			r.logAudit(call.Name, msg.Sender, "error", time.Since(aStart))
+			metrics.IncAction(call.Name, "error")
 			continue
 		}
 		log.Info("action ok", slog.String("action", call.Name), slog.Duration("ms", time.Since(aStart)))
 		r.logAudit(call.Name, msg.Sender, "ok", time.Since(aStart))
+		metrics.IncAction(call.Name, "ok")
 		if len(out) > 0 {
 			actionResults = append(actionResults, fmt.Sprintf("[%s]\n%s", call.Name, string(out)))
 		}
@@ -277,6 +287,7 @@ func (r *Runner) handleMessage(parent context.Context, msg InboundMessage) {
 	}
 	if err := r.sendWithRetry(reqCtx, tr, outMsg, log); err != nil {
 		log.Error("send error", slog.String("err", err.Error()))
+		metrics.IncSendError()
 	}
 }
 
