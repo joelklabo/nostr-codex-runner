@@ -2,16 +2,15 @@
 
 Context
 
-- markdownlint is now scoped to README + landing + key issue docs to keep CI green.
-- Legacy docs/templates violate many rules (blank lines, fenced code spacing, ordered list prefixes).
+- markdownlint now runs across all Markdown via `make lint-md` (markdownlint-cli2@0.19.1).
+- Legacy violations have been cleared; keep the repo clean and document any future exclusions explicitly.
 
 Tasks
 
-- Incrementally bring remaining Markdown files into compliance or update lint config with explicit rationale for exclusions.
-- Prioritize: CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md, docs/*.md, .github templates.
-- Consider auto-format (markdownlint --fix) where safe.
+- Keep new/edited docs lint-clean or add scoped rule disables with rationale.
+- If an exclusion is needed, add it to `.markdownlint.yaml` with a comment.
 
 Acceptance
 
-- markdownlint scope expanded (or exclusions documented) with zero violations.
-- No critical docs (.github templates, CONTRIBUTING) are excluded without a note in `.markdownlint.yaml`.
+- markdownlint covers the repo with zero violations.
+- Any exclusions are documented in `.markdownlint.yaml` with justification.

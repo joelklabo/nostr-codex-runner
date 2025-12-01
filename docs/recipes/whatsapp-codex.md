@@ -3,13 +3,19 @@
 This flow listens on a Twilio WhatsApp webhook, forwards messages to the agent, and replies via Twilio Messages API.
 
 ## Prerequisites
+
 - Twilio account with a WhatsApp-enabled number.
+
 - `ACCOUNT_SID`, `AUTH_TOKEN`, and `FROM` number (e.g., `whatsapp:+15550001234`).
+
 - Publicly reachable webhook URL (ngrok/Cloudflare Tunnel/etc.).
+
 - Go 1.22+ or release binary of this runner.
+
 - Codex CLI installed and on `PATH`.
 
 ## Configure
+
 Add a transport entry (or copy to a dedicated config file):
 
 ```yaml
@@ -58,12 +64,19 @@ logging:
 ```
 
 ## Wire up Twilio webhook
+
 1. Run the runner: `make run` (or `./bin/buddy -config config.yaml`).
+
 2. Expose port `8083` publicly (e.g., `ngrok http 8083`).
+
 3. In Twilio Console, set the WhatsApp sandbox/number webhook URL to `https://<public-host>/twilio/webhook`.
+
 4. Send a WhatsApp message to your Twilio number from an allowed phone; the runner should reply via the agent.
 
 ## Notes
+
 - Signature verification uses Twilio’s `X-Twilio-Signature` with your auth token.
+
 - `base_url` in `config` can point to a mock server for testing.
+
 - The flow is fully composable: swap `agent.type` or `actions` without touching the transport.

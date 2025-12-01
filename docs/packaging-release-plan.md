@@ -3,12 +3,17 @@
 Goal: ship buddy binaries via GitHub Releases with checksums/signing, Homebrew tap, and optional install script.
 
 Deliverables
+
 - goreleaser config updated for `buddy` binary (+ `nostr-buddy` symlink).
+
 - Release artifacts: tar.gz per OS/arch (darwin/linux, amd64/arm64), SHA256 checksums, optional cosign signatures.
+
 - Homebrew tap formula updated/created.
+
 - CI release workflow wired to tags.
 
 Steps
+
 1) Update/author `.goreleaser.yml`
    - Build matrix: darwin/linux, amd64/arm64.
    - Binary name `buddy`; post-build symlink `nostr-buddy` in archives.
@@ -40,6 +45,9 @@ Steps
    - Quick-install doc references checksum and alias handling.
 
 Open questions
+
 - Whether to publish detached cosign signatures; if yes, define key management.
+
 - Whether to embed presets/config example in archives vs separate download.
+
 - Decide on release cadence (align with changelog policy issue 3oa.11).

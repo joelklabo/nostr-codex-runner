@@ -3,13 +3,16 @@
 Quickest way to produce a working config without editing YAML. Preset-first, with a summary and dependency preflight to catch missing binaries early.
 
 ## Usage
+
 ```bash
 buddy wizard [config-path]
 ```
+
 - If no path is given, writes `~/.config/buddy/config.yaml` (creates parent dirs).
 - If the file exists, prompts before overwrite.
 
 ## Flow
+
 1) **Pick a preset** (default `mock-echo`). Shows a one-line summary plus transports/agent/actions in use.
 2) **Fill secrets** only for that preset:
    - For nostr presets: relays (defaults), private key (masked), allowed pubkeys.
@@ -19,6 +22,7 @@ buddy wizard [config-path]
 5) **Dry-run?** preview without writing.
 
 ## What it writes
+
 - Transport: nostr with your relays and keys (or mock if chosen)
 - Agent: chosen type
 - Actions: readfile always; shell if enabled
@@ -26,13 +30,16 @@ buddy wizard [config-path]
 - Storage: `~/.buddy/state.db`
 
 ## After running
+
 - Output shows the config path.
 - Start the runner:
+  
   ```bash
   buddy run -config ~/.config/buddy/config.yaml
   ```
 
 ## Notes
+
 - Uses masked prompts; secrets are not echoed.
 - Writes to buddy paths by default; pass a custom path to override.
 - Same config search order as `buddy run` applies when you start the runner.

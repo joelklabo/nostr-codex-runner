@@ -4,6 +4,7 @@ Current: `joelklabo/buddy` (rename completed)
 Former: `joelklabo/nostr-codex-runner`
 
 Steps
+
 1) **Coordinate timing**
    - Freeze merges during rename window; announce in README and issue tracker.
    - Ensure GitHub Actions secrets carry over to new repo name.
@@ -37,6 +38,9 @@ Steps
    - Verify `go get github.com/joelklabo/buddy/cmd/buddy` works after module update (issue 3oa.39).
 
 Risks/mitigations
+
 - Broken import paths → resolve via module path update and replace directives temporarily.
+
 - Installer scripts fetching old URLs → update scripts and provide redirect notice.
+
 - Cached badges failing → refresh shields.io URLs.

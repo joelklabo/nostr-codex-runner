@@ -19,12 +19,19 @@ Admonitions: keep to short paragraphs; favor inline notes over long warnings.
 Accessibility: spell out emoji meaning in text when used for status (e.g., “✅ ok”).
 
 Templates:
+
 - How-to: Goal → Steps (numbered) → Verify → Troubleshooting.
+
 - Concept: What/Why → Key terms → How it fits → Links to how-tos.
+
 - Reference: Field/name → Type/default → Example → Notes.
 
 Mermaid diagrams:
+
 - Use fenced blocks with language `mermaid`; for styling include an init line like `%%{init: {'theme': 'neutral'}}%%`.
+
 - Prefer LR direction to avoid tall diagrams in README.
-- Keep labels concise; avoid HTML unless necessary for line breaks.
+
+- Keep labels concise; avoid HTML unless necessary for line breaks; follow GitHub guidance (<https://docs.github.com/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams#creating-mermaid-diagrams>).
+
 - Preview on GitHub before merging; broken diagrams should be fixed or removed.

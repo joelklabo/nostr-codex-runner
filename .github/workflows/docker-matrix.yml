@@ -8,15 +8,17 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.name }})
+    name: Build • ${{ matrix.pretty }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - platform: linux/amd64
-            name: linux-amd64
+            label: linux-amd64
+            pretty: AMD64
           - platform: linux/arm64
-            name: linux-arm64
+            label: linux-arm64
+            pretty: ARM64
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -35,6 +37,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: image-${{ matrix.name }}
+          name: image-${{ matrix.label }}
           path: /tmp/image.tar
           retention-days: 7

@@ -3,6 +3,7 @@
 This is the draft script/IA for `buddy wizard [config-path]`.
 
 ## Steps
+
 1) **Welcome**
    - Explain that it will write a config (default: `~/.config/buddy/config.yaml`).
    - Confirm overwrite if file exists.
@@ -38,22 +39,35 @@ This is the draft script/IA for `buddy wizard [config-path]`.
    - Create parent dirs; write YAML, print next commands (`buddy run <preset>` or `buddy run -config <path>`, plus `buddy check <preset>`).
 
 ## Copy snippets (examples)
+
 - Welcome: "We'll ask a few questions and write a YAML config. Secrets stay local and are masked as you type."
+
 - Shell warning: "Shell actions let the agent run commands on your machine. Enable only for trusted operators."
+
 - Collision note: "If you already have another `buddy` on PATH (Buddy.Works), consider using the `nostr-buddy` alias."
 
 ## Validation/UX rules
+
 - Mask secret inputs (private key, API keys).
+
 - Validate hex keys lengths for nostr; retry loop with clear error.
+
 - For overwrites, require explicit "yes".
+
 - Keep prompts single-line; avoid flags; no colors required for MVP.
 
 ## Outputs
+
 - Config YAML written to chosen path.
+
 - Summary printed: path, transport, agent, actions, preset used/overridden.
+
 - Optional: write a `.wizard.yaml` scratch for debugging (off by default).
 
 ## Open questions
+
 - Do we auto-add default relays, or force user to enter at least one?
+
 - Should we collect metrics endpoint and health port? (Probably skip in MVP to stay short.)
+
 - Allow `--dry-run` and `--no-run`? lean to `--dry-run` only if needed for tests.

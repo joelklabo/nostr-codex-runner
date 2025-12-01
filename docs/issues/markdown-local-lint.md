@@ -2,16 +2,16 @@
 
 Context
 
-- CI markdownlint now runs on key docs, but developers may miss formatting issues until push.
+- CI markdownlint now runs across all Markdown (`make lint-md`). Developers should be able to run the same command locally.
 
 Tasks
 
-- Add a helper script or make target to run markdownlint-cli2 with repo config.
-- Document local command in CONTRIBUTING (if not already) and surface in PR template checklist.
+- Keep `make lint-md` documented as the single-source command for markdownlint-cli2.
+- Surface the check in CONTRIBUTING and the PR checklist.
 - Optionally add a pre-commit hook snippet in docs/style-guide.md.
 
 Acceptance
 
-- One-line local lint command available (script/Makefile target) and documented.
-- PR template mentions running markdownlint.
+- `make lint-md` matches CI coverage/config and is documented.
+- PR template reminds contributors to run it.
 - CI remains green with the same config.

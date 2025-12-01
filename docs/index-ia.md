@@ -3,10 +3,13 @@
 Goal: one landing page that routes **Users** and **Contributors** quickly, keeping README lean. This IA will become `docs/index.md`.
 
 ## Top-level structure
+
 - Hero: one-liner + primary CTAs: `Quickstart (Users)` and `Contribute (Developers)`.
+
 - Secondary nav: `Presets`, `Wizard`, `Config`, `Recipes`, `FAQ`, `Security`, `Changelog`.
 
 ## User track (getting running fast)
+
 1) Quickstart
    - 3-step install and run (`brew install buddy` / `curl | sh`, `buddy presets`, `buddy wizard` or `buddy run <preset>`).
    - Expected first DM/response; config path emitted.
@@ -24,6 +27,7 @@ Goal: one landing page that routes **Users** and **Contributors** quickly, keepi
    - Link to latest release and changelog policy.
 
 ## Contributor track (building/adding)
+
 1) Contributing guide
    - bd workflow, one commit per issue, Go 1.22+, testing commands.
 2) Local dev setup
@@ -42,8 +46,11 @@ Goal: one landing page that routes **Users** and **Contributors** quickly, keepi
    - Docs style + code style links; templates.
 
 ## Footer links
+
 - README (short), Releases, Security policy, Code of Conduct, License.
 
 ## Open items / placeholders
+
 - Publish docs under the renamed `buddy` repo and confirm installer URL (`https://get.buddy.sh`) is stable.
+
 - Finalize preset list and commands when CLI spec stabilizes (current set: claude-dm, copilot-shell, local-llm, mock-echo).

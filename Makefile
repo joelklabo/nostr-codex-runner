@@ -1,4 +1,4 @@
-.PHONY: run build lint lint-ci lint-md test fmt install verify
+.PHONY: run build lint lint-ci lint-md test fmt install verify brew-check
 
 CONFIG ?= config.yaml
 BIN ?= bin/buddy
@@ -20,7 +20,10 @@ lint-ci:
 	golangci-lint run --modules-download-mode=mod --timeout=5m ./...
 
 lint-md:
-	npx -y markdownlint-cli2@0.8.1 README.md docs/landing.md docs/readme-details.md docs/issues/*.md
+	npx -y markdownlint-cli2@0.19.1 "**/*.md" "!**/node_modules" "!.git" "!.beads" "!vendor"
+
+brew-check:
+	HOMEBREW_GITHUB_API_TOKEN=$${HOMEBREW_GITHUB_API_TOKEN:-$${GH_TOKEN:-}} scripts/brew-check.sh
 
 test:
 	go test ./...

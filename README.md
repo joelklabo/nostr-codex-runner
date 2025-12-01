@@ -1,6 +1,8 @@
 # buddy — friendly transport → agent → actions runner
 
-![buddy logo](assets/buddy.png)
+<div align="center">
+  <img src="assets/buddy-hero.png" alt="buddy logo" width="100%" />
+</div>
 
 Binary-first, wizard-assisted CLI that turns messages (Nostr by default, mock offline) into agent actions in minutes.
 
@@ -20,12 +22,14 @@ Inspired by [warelay](https://github.com/steipete/warelay) for a clean relay-fir
 ## Quick install
 
 ```bash
-# Homebrew (macOS/Linux)
+# Homebrew (macOS/Linux) – tap is updated from our releases
 brew install joelklabo/tap/buddy
 
-# or script (downloads release, verifies checksum)
+# or script (downloads release, verifies checksum, no brew needed)
 curl -fsSL https://get.buddy.sh | sh
 ```
+
+> Homebrew is checked in CI and via `make brew-check` (macOS only) if you want to validate locally.
 
 ## Quick start (wizard-first)
 
@@ -37,13 +41,11 @@ curl -fsSL https://get.buddy.sh | sh
 ## How it works (example)
 
 ```mermaid
-%%{init: {'theme': 'neutral'}}%%
 flowchart LR
-  A["Allowed sender DM<br/>/new top process?"] --> B["Nostr transport"]
-  B --> C["buddy runner"]
-  C --> D["Agent (Claude / OpenAI / Copilot / local)"]
-  D --> E["Action: shell / readfile / writefile"]
-  E --> F["Reply to sender"]
+  A[Allowed sender DM "/new top process?"] -->|Nostr| B(buddy runner)
+  B --> C[Agent: Claude / OpenAI / Copilot / local]
+  C --> D[Action: shell / readfile / writefile]
+  D --> E[Reply to sender]
 ```
 
 - Transports: Nostr DMs (default) or mock; others pluggable.

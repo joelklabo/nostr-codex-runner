@@ -17,7 +17,7 @@ Thanks for helping improve the project! This repo uses `bd` for issue tracking a
 - Lint: `go vet ./...`
 - Tests: `go test ./...`
 - Run: `make run` (expects `config.yaml`) or `buddy run <preset|config>` with embedded presets.
-- Docs: `make lint-md` (uses `npx markdownlint-cli2@0.8.1` on README + landing docs to match CI). Requires Node 20+.
+- Docs: `make lint-md` (runs `markdownlint-cli2@0.19.1` across all Markdown, same as CI). Requires Node 20+.
 
 ## Commit and PR guidelines
 

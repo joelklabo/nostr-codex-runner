@@ -1,6 +1,7 @@
 # Help/Man Implementation Plan (execution)
 
 Tasks
+
 1) Add `help` subcommands and `--help` flags to match CLI map; ensure `buddy help [cmd]` works (run, check, wizard, presets, init-config, version).
 2) Generate man page using `go-md2man` during release:
    - Add `docs/man/buddy.1.md` (markdown source) with synopsis, commands, env, files, examples, exit codes.
@@ -11,5 +12,6 @@ Tasks
 5) Docs: mention man page availability in README quick links; include `buddy check`/`init-config` in synopsis.
 
 Notes
+
 - Keep output short; no ANSI.
 - `buddy version` should remain simple; `--json` flag can be added later if needed.

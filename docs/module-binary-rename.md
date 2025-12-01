@@ -4,6 +4,7 @@ Current module: `module github.com/joelklabo/buddy`
 Current binary: `buddy`
 
 Steps
+
 1) After repo rename (3oa.38), update `go.mod` module path and run `go mod tidy`.
 2) Update import paths across repo (`github.com/joelklabo/nostr-codex-runner` → `github.com/joelklabo/buddy`).
 3) Tests/CI:
@@ -17,5 +18,7 @@ Steps
    - `buddy version` shows new module path.
 
 Risks
+
 - Downstream imports break: mitigate with replace directive temporarily and clear release notes.
+
 - Users with old binary names: provide shim and warning.

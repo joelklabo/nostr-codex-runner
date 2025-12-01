@@ -3,6 +3,7 @@
 Goal: sub-400 word README that sells the binary-first buddy CLI, shows how to install and try it in 2 minutes, and defers details to docs.
 
 ## Proposed sections (order)
+
 1) **Hero/what** – one sentence: "buddy is a pluggable transport→agent→actions runner (Nostr-first) with presets and a guided wizard."
 2) **Quick install** – two options:
    - Homebrew: `brew install buddy` (or tap path once defined).
@@ -28,11 +29,17 @@ Goal: sub-400 word README that sells the binary-first buddy CLI, shows how to in
 9) **License/links** – MIT, releases, docs index, changelog.
 
 ## Tone & layout notes
+
 - Keep first screen above the fold: hero + quick install + quick start.
+
 - Avoid long plugin lists; link to plugin catalog instead.
+
 - Prefer short sentences and command blocks; trim adjectives.
+
 - Mention security briefly (allowlist, no secret logging) with link to Security doc.
 
 ## Open questions
+
 - Final install URL/tap name after repo rename.
+
 - Whether to default to `buddy` binary or ship `nostr-buddy` alias prominently in README.

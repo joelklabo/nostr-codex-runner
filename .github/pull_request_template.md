@@ -6,6 +6,7 @@
 
 - [ ] `go test ./...`
 - [ ] `go vet ./...`
+- [ ] `make lint-md`
 - [ ] Manual:
 
 ## Checklist
