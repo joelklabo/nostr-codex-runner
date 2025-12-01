@@ -15,10 +15,16 @@ jobs:
       - name: Brew update
         run: brew update
       - name: Tap joelklabo/tap
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: brew tap joelklabo/tap
       - name: Brew info buddy
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: brew info buddy
       - name: Brew install buddy
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: brew install joelklabo/tap/buddy
       - name: buddy version
         run: buddy --version
