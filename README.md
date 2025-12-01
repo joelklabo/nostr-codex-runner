@@ -118,6 +118,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - [Recipe: WhatsApp + Codex](docs/recipes/whatsapp-codex.md)
 - [Recipe: systemd service](docs/recipes/systemd.md)
 - [Recipe: Docker run](docs/recipes/docker.md)
+- Sample configs: `sample-flows/` (e.g., `nostr-copilot-cli.yaml`, `whatsapp-codex.yaml`)
 
 ## Configuration reference (plugins)
 

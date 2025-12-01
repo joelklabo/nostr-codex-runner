@@ -1,0 +1,50 @@
+# Sample flow: WhatsApp (Twilio) transport + Codex CLI agent + basic actions
+runner:
+  private_key: "<your_nsec_hex>"
+  allowed_pubkeys: ["<operator_npub_hex>"]
+  initial_prompt: "You are an assistant replying on WhatsApp. Be concise and safe."
+  session_timeout_minutes: 240
+
+transports:
+  - type: whatsapp
+    id: whatsapp
+    config:
+      account_sid: "ACxxxxxxxx"
+      auth_token: "your_twilio_auth_token"
+      from_number: "whatsapp:+15550001234"
+      listen: ":8083"
+      path: "/twilio/webhook"
+      allowed_numbers: ["15555550100"]
+      signature_key: "your_twilio_auth_token"
+
+agent:
+  type: codexcli
+  config:
+    binary: codex
+    working_dir: .
+    timeout_seconds: 900
+
+actions:
+  - type: shell
+    name: shell
+    workdir: .
+    timeout_seconds: 30
+    max_output: 4000
+  - type: readfile
+    name: readfile
+    roots: ["."]
+    max_bytes: 65536
+  - type: writefile
+    name: writefile
+    roots: ["."]
+    allow_write: true
+    max_bytes: 65536
+
+storage:
+  path: ./state.db
+logging:
+  level: info
+projects:
+  - id: default
+    name: default
+    path: .

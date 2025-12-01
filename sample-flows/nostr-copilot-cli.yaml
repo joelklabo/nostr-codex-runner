@@ -1,0 +1,46 @@
+# Sample flow: Nostr transport + Copilot CLI agent + basic actions
+runner:
+  private_key: "<your_nsec_hex>"
+  allowed_pubkeys: ["<operator_npub_hex>"]
+  initial_prompt: "You are an assistant using Copilot CLI. Be concise and safe."
+  session_timeout_minutes: 240
+
+transports:
+  - type: nostr
+    id: nostr
+    relays: ["wss://relay.damus.io"]
+    private_key: "<your_nsec_hex>"
+    allowed_pubkeys: ["<operator_npub_hex>"]
+
+agent:
+  type: copilotcli
+  config:
+    binary: copilot
+    working_dir: .
+    timeout_seconds: 180
+    extra_args: ["--allow-all-tools"]
+
+actions:
+  - type: shell
+    name: shell
+    workdir: .
+    timeout_seconds: 30
+    max_output: 4000
+  - type: readfile
+    name: readfile
+    roots: ["."]
+    max_bytes: 65536
+  - type: writefile
+    name: writefile
+    roots: ["."]
+    allow_write: true
+    max_bytes: 65536
+
+storage:
+  path: ./state.db
+logging:
+  level: info
+projects:
+  - id: default
+    name: default
+    path: .
