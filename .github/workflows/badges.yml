@@ -10,6 +10,6 @@ jobs:
   update-badges:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Update badge links (noop placeholder)
         run: echo "Badges will be updated after repo rename to buddy"
