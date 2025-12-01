@@ -111,13 +111,17 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read config: %w", err)
 	}
+	return LoadBytes(raw, filepath.Dir(path))
+}
+
+// LoadBytes parses config YAML from bytes and validates, using baseDir for relative paths.
+func LoadBytes(raw []byte, baseDir string) (*Config, error) {
 
 	var cfg Config
 	if err := yaml.Unmarshal(raw, &cfg); err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 
-	baseDir := filepath.Dir(path)
 	cfg.applyDefaults(baseDir)
 	cfg.Storage.Path = expandPath(cfg.Storage.Path)
 	if err := cfg.Validate(); err != nil {

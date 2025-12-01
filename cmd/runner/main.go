@@ -74,18 +74,22 @@ func runContext(parent context.Context, args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	if fs.NArg() > 0 {
+	var positional string
+	if fs.NArg() > 1 {
 		fmt.Fprintf(os.Stderr, "unexpected arguments: %v\n\n", fs.Args())
 		usage()
 		return fmt.Errorf("unexpected arguments: %v", fs.Args())
+	}
+	if fs.NArg() == 1 {
+		positional = fs.Arg(0)
 	}
 
 	ctx, stop := signal.NotifyContext(parent, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	cfg, err := config.Load(*configPath)
+	cfg, _, err := loadConfigWithPresets(*configPath, positional)
 	if err != nil {
-		return friendlyConfigErr(*configPath, err)
+		return err
 	}
 
 	for _, w := range collectCompatWarnings(*configPath) {
@@ -276,6 +280,35 @@ func runWizard(args []string) error {
 	return nil
 }
 
+func loadConfigWithPresets(flagConfig string, positional string) (*config.Config, string, error) {
+	// If positional provided, prefer it; otherwise fallback to flag/default path.
+	if positional != "" {
+		// If file exists, load as config.
+		if fileExists(positional) {
+			cfg, err := config.Load(positional)
+			if err != nil {
+				return nil, positional, friendlyConfigErr(positional, err)
+			}
+			return cfg, positional, nil
+		}
+		// Try preset
+		if data, err := presets.Get(positional); err == nil {
+			cfg, err := config.LoadBytes(data, ".")
+			if err != nil {
+				return nil, positional, fmt.Errorf("load preset %s: %w", positional, err)
+			}
+			return cfg, positional, nil
+		}
+		return nil, positional, fmt.Errorf("path or preset %q not found", positional)
+	}
+
+	cfg, err := config.Load(flagConfig)
+	if err != nil {
+		return nil, flagConfig, friendlyConfigErr(flagConfig, err)
+	}
+	return cfg, flagConfig, nil
+}
+
 func collectCompatWarnings(configPath string) []string {
 	var warnings []string
 	if os.Getenv(envConfigLegacy) != "" {
@@ -323,10 +356,21 @@ func runPresets(args []string) error {
 		return nil
 	}
 	name := args[0]
-	data, err := presets.Get(name)
-	if err != nil {
-		return err
+	if len(args) == 2 && args[1] == "--yaml" {
+		data, err := presets.Get(name)
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(data))
+		return nil
 	}
-	fmt.Print(string(data))
+	descMap := presets.List()
+	if _, ok := descMap[name]; !ok {
+		return fmt.Errorf("unknown preset %s", name)
+	}
+	fmt.Printf("Preset: %s\n", name)
+	fmt.Printf("Description: %s\n", descMap[name])
+	fmt.Printf("Run it:\n  buddy run %s\n\n", name)
+	fmt.Println("View YAML: buddy presets", name, "--yaml")
 	return nil
 }
