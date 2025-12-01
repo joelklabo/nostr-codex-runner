@@ -12,6 +12,7 @@ type fakeAction struct{ name string }
 
 func (f *fakeAction) Name() string           { return f.name }
 func (f *fakeAction) Capabilities() []string { return nil }
+func (f *fakeAction) Help() string           { return "" }
 func (f *fakeAction) Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error) {
 	return json.RawMessage(`"ok"`), nil
 }

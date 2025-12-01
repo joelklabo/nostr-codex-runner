@@ -25,6 +25,8 @@ type Agent interface {
 type Action interface {
 	Name() string
 	Capabilities() []string
+	// Help returns a short usage string (single line). Empty string means no help entry.
+	Help() string
 	Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error)
 }
 

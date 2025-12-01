@@ -38,6 +38,10 @@ func (a *Action) Name() string { return "shell" }
 
 func (a *Action) Capabilities() []string { return []string{"shell:exec"} }
 
+func (a *Action) Help() string {
+	return "/shell <command> — execute a shell command (if enabled); obeys allowlist and timeouts."
+}
+
 func (a *Action) Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error) {
 	var payload struct {
 		Command string `json:"command"`

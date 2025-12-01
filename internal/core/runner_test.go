@@ -73,6 +73,7 @@ type mockAction struct {
 
 func (m *mockAction) Name() string           { return m.name }
 func (m *mockAction) Capabilities() []string { return nil }
+func (m *mockAction) Help() string           { return "" }
 func (m *mockAction) Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error) {
 	return json.RawMessage(m.result), nil
 }

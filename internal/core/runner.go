@@ -350,7 +350,7 @@ func (r *Runner) sendSimple(ctx context.Context, transportID, recipient, threadI
 }
 
 func helpText() string {
-	return "Commands: /help, /status, /new [prompt], /use <session-id>, /shell <cmd> (requires shell action). Anything else runs as prompt."
+	return "Commands: /help, /status, /new [prompt], /use <session-id>, action commands (see below). Anything else runs as prompt."
 }
 
 func machineGreeting() string {
@@ -372,7 +372,7 @@ func (r *Runner) handleCommand(ctx context.Context, msg InboundMessage, log *slo
 	cmd := commands.Parse(msg.Text)
 	switch cmd.Name {
 	case "help":
-		r.sendSimple(ctx, msg.Transport, msg.Sender, msg.ThreadID, helpText())
+		r.sendSimple(ctx, msg.Transport, msg.Sender, msg.ThreadID, r.renderHelp())
 		return true
 	case "status":
 		if r.store != nil {
@@ -441,4 +441,16 @@ func (r *Runner) preparePrompt(cmd commands.Command, sender string) (string, str
 		}
 	}
 	return prompt, sessionID
+}
+
+func (r *Runner) renderHelp() string {
+	lines := []string{helpText()}
+	for _, spec := range r.actionSpecs {
+		if act, ok := r.actions[spec.Name]; ok {
+			if h := act.Help(); strings.TrimSpace(h) != "" {
+				lines = append(lines, h)
+			}
+		}
+	}
+	return strings.Join(lines, "\n")
 }

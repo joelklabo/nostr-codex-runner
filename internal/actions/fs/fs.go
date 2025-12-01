@@ -33,6 +33,9 @@ func NewReadFile(cfg Config) *ReadFile {
 
 func (r *ReadFile) Name() string           { return "readfile" }
 func (r *ReadFile) Capabilities() []string { return []string{"fs:read"} }
+func (r *ReadFile) Help() string {
+	return `readfile: {"path": "<file>"} — constrained to configured roots; max_bytes enforced.`
+}
 
 func (r *ReadFile) Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error) {
 	var payload struct {
@@ -82,6 +85,9 @@ func NewWriteFile(cfg Config) *WriteFile {
 
 func (w *WriteFile) Name() string           { return "writefile" }
 func (w *WriteFile) Capabilities() []string { return []string{"fs:write"} }
+func (w *WriteFile) Help() string {
+	return `writefile: {"path": "<file>", "content": "<text>"} — constrained to roots/max_bytes; allow_write must be true.`
+}
 
 func (w *WriteFile) Invoke(ctx context.Context, args json.RawMessage) (json.RawMessage, error) {
 	if !w.cfg.AllowWrite {
