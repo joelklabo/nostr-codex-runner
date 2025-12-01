@@ -261,7 +261,7 @@ projects:
 
 ## Development
 
-- Requirements: Go ≥1.22, Codex CLI installed and on PATH for the Codex agent; other agents may have their own deps.
+- Requirements: Go ≥1.24.10, Codex CLI installed and on PATH for the Codex agent; other agents may have their own deps.
 - Commands: `make run`, `make build`, `make test`, `make lint`, `make fmt`, `make install`.
 - CI extras: coverage, staticcheck, misspell+gofmt, govulncheck, gosec, docker build, release.
 - Formatting: `gofmt -w` on Go files before committing.
