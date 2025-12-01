@@ -1,0 +1,40 @@
+# Minimal flow: Nostr transport + Codex CLI agent + shell/readfile actions
+runner:
+  private_key: "<your_nsec_hex>"
+  allowed_pubkeys: ["<operator_npub_hex>"]
+  initial_prompt: "You are an AI agent with shell access. Be concise and careful."
+
+transports:
+  - type: nostr
+    id: nostr
+    relays: ["wss://relay.damus.io"]
+    private_key: "<your_nsec_hex>"
+    allowed_pubkeys: ["<operator_npub_hex>"]
+
+agent:
+  type: codexcli
+  config:
+    binary: codex
+    sandbox: danger-full-access
+    approval: never
+    timeout_seconds: 900
+
+actions:
+  - type: shell
+    name: shell
+    workdir: .
+    timeout_seconds: 30
+    max_output: 4000
+  - type: readfile
+    name: readfile
+    roots: ["."]
+    max_bytes: 65536
+
+storage:
+  path: ./state.db
+logging:
+  level: info
+projects:
+  - id: default
+    name: default
+    path: .
