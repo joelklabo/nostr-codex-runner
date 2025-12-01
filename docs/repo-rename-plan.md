@@ -1,16 +1,15 @@
 # Repo Rename Plan – Issue 3oa.38
 
-Current: `joelklabo/nostr-codex-runner`
-Target: `joelklabo/buddy` (or org move if decided later)
+Current: `joelklabo/buddy` (rename completed)
+Former: `joelklabo/nostr-codex-runner`
 
 Steps
 1) **Coordinate timing**
    - Freeze merges during rename window; announce in README and issue tracker.
    - Ensure GitHub Actions secrets carry over to new repo name.
 
-2) **GitHub rename**
-   - Rename repo in GitHub settings; GitHub auto-creates redirects for clones and issues.
-   - Verify Actions workflows still trigger after rename.
+2) **GitHub rename** ✅ completed
+   - Verify redirects and Actions after rename.
 
 3) **Module path implications**
    - Plan to update Go module path (covered in issue 3oa.39) immediately after rename to avoid broken `go get`.

@@ -48,7 +48,7 @@ Goal: ship a binary-first "buddy" CLI with a fast install, guided wizard, preset
 
 ### Name & Migration
 37. P0 Name locked: "buddy"; note `bud` alias is opt-in with collision warning.
-38. P0 Repo rename plan (`nostr-codex-runner` → `buddy` repo; redirects, CI updates).
+38. P0 Repo rename plan (`nostr-codex-runner` → `buddy` repo; redirects, CI updates). ✅ done
 39. P0 Module/binary rename (Go module path, imports, main package; build `buddy` + alias).
 40. P1 Package manager updates (Homebrew formula rename, release artifacts).
 41. P1 Brand migration in docs (README, docs index, wizard copy, badges).
@@ -59,4 +59,4 @@ Goal: ship a binary-first "buddy" CLI with a fast install, guided wizard, preset
 ## Notes
 - One issue per commit; run tests after each commit.
 - Default collision mitigation: ship `buddy` plus optional alias (`bud` off by default).
-- Until rename completes, expect temporary references to `nostr-codex-runner` binaries/module.
+- Rename done; legacy references now only for backcompat notes.
