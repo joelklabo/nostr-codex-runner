@@ -241,7 +241,7 @@ func fileExists(path string) bool {
 
 func friendlyConfigErr(path string, err error) error {
 	if errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("config not found at %s. Searched (in order): %s. Hint: run the wizard or copy config.example.yaml.", path, strings.Join(configSearchOrder(), ", "))
+		return fmt.Errorf("config not found at %s; searched (in order): %s; hint: run the wizard or copy config.example.yaml", path, strings.Join(configSearchOrder(), ", "))
 	}
 	return fmt.Errorf("load config %s: %w", path, err)
 }
