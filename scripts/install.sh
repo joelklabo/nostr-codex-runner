@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="joelklabo/nostr-codex-runner"
-BINARY_NAME="nostr-codex-runner"
+REPO="joelklabo/buddy"
+BINARY_NAME="buddy"
+ALIAS_NAME="nostr-buddy"
 INSTALL_DIR=${INSTALL_DIR:-"$HOME/.local/bin"}
 VERSION=${VERSION:-"latest"}
 CONFIG_DIR=${CONFIG_DIR:-"$(pwd)"}
+INSTALL_ALIAS=${INSTALL_ALIAS:-"true"} # set to false to skip alias/symlink
 
 log() { echo "[installer] $*"; }
 err() { echo "[installer] error: $*" >&2; }
@@ -45,6 +47,10 @@ download_asset() {
   mkdir -p "$INSTALL_DIR"
   mv "$tmp" "$INSTALL_DIR/$BINARY_NAME"
   log "Installed to $INSTALL_DIR/$BINARY_NAME"
+  if [ "$INSTALL_ALIAS" = "true" ]; then
+    ln -sf "$INSTALL_DIR/$BINARY_NAME" "$INSTALL_DIR/$ALIAS_NAME"
+    log "Alias created: $INSTALL_DIR/$ALIAS_NAME"
+  fi
 }
 
 fallback_go_install() {
