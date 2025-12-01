@@ -47,13 +47,13 @@ Goal: ship a binary-first "buddy" CLI with a fast install, guided wizard, preset
 36. P3 Windows support decision (scoop/winget or "not yet").
 
 ### Name & Migration
-37. P0 Name locked: "buddy"; note `bud` alias is opt-in with collision warning.
+37. P0 Name locked: "buddy".
 38. P0 Repo rename plan (`nostr-codex-runner` → `buddy` repo; redirects, CI updates). ✅ done
-39. P0 Module/binary rename (Go module path, imports, main package; build `buddy` + alias).
+39. P0 Module/binary rename (Go module path, imports, main package; build `buddy`). ✅ done
 40. P1 Package manager updates (Homebrew formula rename, release artifacts).
-41. P1 Brand migration in docs (README, docs index, wizard copy, badges).
-42. P1 CLI help/man text with new name; mention alias.
-43. P1 Backward-compat note (old command mapping; deprecation window).
+41. P1 Brand migration in docs (README, docs index, wizard copy, badges). ✅ mostly done
+42. P1 CLI help/man text with new name. ✅
+43. P1 Backward-compat note (old command mapping). **dropped**
 44. P2 Domain/SEO check (distinct from Buddy.Works; optional microsite).
 
 ## Notes
