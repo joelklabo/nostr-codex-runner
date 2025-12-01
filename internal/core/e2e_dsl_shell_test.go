@@ -5,7 +5,6 @@ import (
 	"io"
 	"log/slog"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -13,18 +12,6 @@ import (
 	"github.com/joelklabo/buddy/internal/core"
 	tmock "github.com/joelklabo/buddy/internal/transports/mock"
 )
-
-type auditStub struct {
-	mu   sync.Mutex
-	logs []string
-}
-
-func (a *auditStub) AppendAudit(action, sender, outcome string, dur time.Duration) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.logs = append(a.logs, action+":"+outcome)
-	return nil
-}
 
 // DSL integration: /shell command triggers shell action and audit.
 func TestRunnerDSLInvokeShellAction(t *testing.T) {

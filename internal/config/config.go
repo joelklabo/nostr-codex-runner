@@ -272,18 +272,6 @@ func applyCLIConfigDefaults(c *CodexConfig) {
 	}
 }
 
-// isZero reports whether all fields are zero values.
-func (c CodexConfig) isZero() bool {
-	return c.Binary == "" &&
-		c.Sandbox == "" &&
-		c.Approval == "" &&
-		c.Profile == "" &&
-		c.WorkingDir == "" &&
-		len(c.ExtraArgs) == 0 &&
-		!c.SkipGitRepoCheck &&
-		c.TimeoutSeconds == 0
-}
-
 func expandPath(p string) string {
 	if p == "" {
 		return p

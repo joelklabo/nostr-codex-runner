@@ -11,14 +11,14 @@ import (
 
 func TestEnvChecker(t *testing.T) {
 	const key = "CHECK_TEST_ENV"
-	os.Unsetenv(key)
+	_ = os.Unsetenv(key)
 	c := EnvChecker{}
 	res := c.Check(DepInput{Name: key, Type: "env"})
 	if res.Status != "MISSING" {
 		t.Fatalf("expected missing when unset, got %s", res.Status)
 	}
-	os.Setenv(key, "ok")
-	defer os.Unsetenv(key)
+	_ = os.Setenv(key, "ok")
+	defer func() { _ = os.Unsetenv(key) }()
 	res = c.Check(DepInput{Name: key, Type: "env"})
 	if res.Status != "OK" {
 		t.Fatalf("expected OK when set, got %s", res.Status)
@@ -61,7 +61,7 @@ func TestPortChecker(t *testing.T) {
 		t.Fatalf("listen: %v", err)
 	}
 	addr := ln.Addr().String()
-	defer ln.Close()
+	defer func() { _ = ln.Close() }()
 
 	c := PortChecker{}
 	res := c.Check(DepInput{Name: addr, Type: "port"})
@@ -81,7 +81,7 @@ func TestRelayChecker(t *testing.T) {
 		t.Fatalf("listen: %v", err)
 	}
 	addr := ln.Addr().String()
-	defer ln.Close()
+	defer func() { _ = ln.Close() }()
 
 	c := RelayChecker{}
 	res := c.Check(DepInput{Name: "wss://" + addr, Type: "relay"})

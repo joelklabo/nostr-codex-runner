@@ -94,12 +94,3 @@ func TestSetRegistryOverridesOptions(t *testing.T) {
 		t.Fatalf("run with custom registry: %v", err)
 	}
 }
-
-func containsAll(s string, needles []string) bool {
-	for _, n := range needles {
-		if !strings.Contains(s, n) {
-			return false
-		}
-	}
-	return true
-}

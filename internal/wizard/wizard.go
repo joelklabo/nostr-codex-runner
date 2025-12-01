@@ -359,22 +359,6 @@ func (surveyPrompter) AskConfirm(label string, def bool) (bool, error) {
 	return ans, nil
 }
 
-func transportNames(opts []TransportOption) []string {
-	names := make([]string, 0, len(opts))
-	for _, o := range opts {
-		names = append(names, o.Name)
-	}
-	return names
-}
-
-func agentNames(opts []AgentOption) []string {
-	names := make([]string, 0, len(opts))
-	for _, o := range opts {
-		names = append(names, o.Name)
-	}
-	return names
-}
-
 func defaultChoice(defaultVal string, options []string) string {
 	for _, opt := range options {
 		if opt == defaultVal {

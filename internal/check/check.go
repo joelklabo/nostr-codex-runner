@@ -101,7 +101,7 @@ func (URLChecker) Check(dep DepInput) Result {
 		res.Details = fmt.Sprintf("request failed (%s)", dep.Hint)
 		return res
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode >= 400 {
 		res.Status = missingStatus(dep.Optional)
 		res.Details = fmt.Sprintf("status %d (%s)", resp.StatusCode, dep.Hint)
@@ -121,7 +121,7 @@ func (PortChecker) Check(dep DepInput) Result {
 		res.Details = fmt.Sprintf("unreachable (%s)", dep.Hint)
 		return res
 	}
-	conn.Close()
+	_ = conn.Close()
 	return res
 }
 
@@ -142,7 +142,7 @@ func (RelayChecker) Check(dep DepInput) Result {
 		res.Details = fmt.Sprintf("unreachable (%s)", dep.Hint)
 		return res
 	}
-	conn.Close()
+	_ = conn.Close()
 	return res
 }
 
@@ -162,7 +162,7 @@ func (DirWriteChecker) Check(dep DepInput) Result {
 		res.Details = fmt.Sprintf("not writable (%s)", dep.Hint)
 		return res
 	}
-	f.Close()
+	_ = f.Close()
 	_ = os.Remove(f.Name())
 	return res
 }
