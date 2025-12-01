@@ -81,8 +81,10 @@ These are all composable—pick any transport + one agent + any actions in `conf
   curl -fsSL https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/scripts/install.sh | bash
   ```
   Customize with env vars: `INSTALL_DIR`, `CONFIG_DIR`, `VERSION` (tag or `latest`).
-- Prerequisite: Codex CLI must be installed and on `PATH` (full-access mode configured by default).
- - Full-access Codex: config sets `sandbox: danger-full-access`, `approval: never`, and `extra_args: ["--dangerously-bypass-approvals-and-sandbox"]` to give the agent unrestricted system access. Keep this only on trusted machines.
+  - Prerequisites depend on the agent you choose:
+    - Codex CLI: binary on `PATH`; optional full-access flags (`sandbox: danger-full-access`, `approval: never`, `extra_args: ["--dangerously-bypass-approvals-and-sandbox"]`) — only on trusted machines.
+    - Copilot CLI: `npm install -g @github/copilot && copilot auth login`.
+    - HTTP/echo agents: no extra deps beyond Go.
 
 ## Running it remotely / outside your LAN
 The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/raw` or your own VPN/Tailscale/SSH setup; there is no web UI. Optional health endpoint: run with `-health-listen 127.0.0.1:8081` for `/health` JSON.
@@ -188,6 +190,41 @@ storage:
   path: ./state.db
 logging:
   level: info
+
+### Flow example: WhatsApp (Twilio) + Codex CLI
+1. Configure `config.yaml` (or add alongside other transports):
+```yaml
+transports:
+  - type: whatsapp
+    id: whatsapp
+    config:
+      account_sid: "ACxxxxxxxx"
+      auth_token: "your_twilio_auth_token"
+      from_number: "whatsapp:+15550001234"
+      listen: ":8083"
+      path: "/twilio/webhook"
+      allowed_numbers: ["15555550100"]   # optional allowlist (E.164 without +)
+agent:
+  type: codexcli
+  config:
+    binary: codex
+    working_dir: .
+    timeout_seconds: 900
+actions:
+  - type: shell
+  - type: readfile
+  - type: writefile
+runner:
+  max_reply_chars: 4000
+  initial_prompt: "You are an agent responding to WhatsApp users. Be concise and safe."
+storage:
+  path: ./state.db
+logging:
+  level: info
+```
+2. Run `make run`.
+3. Expose `listen` publicly (e.g., `ngrok http 8083`) and set your Twilio WhatsApp webhook URL to `https://<public>/twilio/webhook`.
+4. Send a WhatsApp message from an allowed number; the runner replies via Codex.
 ```
 
 ### Slack stub config example (transport swap)
