@@ -260,16 +260,6 @@ func (c *Config) applyDefaults(baseDir string) {
 	if c.Agent.Type == "" {
 		c.Agent.Type = "codexcli"
 	}
-	if len(c.Actions) == 0 {
-		c.Actions = []ActionConfig{{
-			Type:        "shell",
-			Name:        "shell",
-			Workdir:     agentCfg.WorkingDir,
-			TimeoutSecs: agentCfg.TimeoutSeconds,
-			MaxOutput:   c.Runner.MaxReplyChars,
-			Allowed:     []string{},
-		}}
-	}
 }
 
 // applyCLIConfigDefaults fills defaults for CLI-like agent configs.

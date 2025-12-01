@@ -5,9 +5,9 @@ import (
 	"strings"
 )
 
-// Command represents a parsed user instruction carried over Nostr.
+// Command represents a parsed user instruction carried over transports.
 type Command struct {
-	Name string // run|new|reset|use|status|help|raw
+	Name string // run|new|reset|use|status|help|shell
 	Args string // remaining text after the command keyword
 	Raw  string // original user message
 }
@@ -19,6 +19,7 @@ type Command struct {
 //	"/use <session-id>"            -> switch to an existing session
 //	"/status"                      -> show active session info
 //	"/help"                        -> usage help
+//	"/shell <command>"             -> run a shell action (if enabled)
 //	Anything else                  -> run prompt in the active/new session
 func Parse(msg string) Command {
 	trimmed := strings.TrimSpace(msg)
@@ -37,10 +38,10 @@ func Parse(msg string) Command {
 		return Command{Name: "use", Args: strings.TrimSpace(trimmed[4:]), Raw: msg}
 	case strings.HasPrefix(lower, "use"):
 		return Command{Name: "use", Args: strings.TrimSpace(trimmed[3:]), Raw: msg}
-	case strings.HasPrefix(lower, "/raw"):
-		return Command{Name: "raw", Args: strings.TrimSpace(trimmed[4:]), Raw: msg}
-	case strings.HasPrefix(lower, "raw"):
-		return Command{Name: "raw", Args: strings.TrimSpace(trimmed[3:]), Raw: msg}
+	case strings.HasPrefix(lower, "/shell"):
+		return Command{Name: "shell", Args: strings.TrimSpace(trimmed[6:]), Raw: msg}
+	case strings.HasPrefix(lower, "shell"):
+		return Command{Name: "shell", Args: strings.TrimSpace(trimmed[5:]), Raw: msg}
 	case strings.HasPrefix(lower, "/status"):
 		return Command{Name: "status", Raw: msg}
 	case strings.HasPrefix(lower, "status"):

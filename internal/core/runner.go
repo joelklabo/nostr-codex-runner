@@ -350,7 +350,7 @@ func (r *Runner) sendSimple(ctx context.Context, transportID, recipient, threadI
 }
 
 func helpText() string {
-	return "Commands: /help, /status, /new [prompt], /use <session-id>, /raw <cmd>. Anything else runs as prompt."
+	return "Commands: /help, /status, /new [prompt], /use <session-id>, /shell <cmd> (requires shell action). Anything else runs as prompt."
 }
 
 func machineGreeting() string {
@@ -403,9 +403,9 @@ func (r *Runner) handleCommand(ctx context.Context, msg InboundMessage, log *slo
 		}
 		r.sendSimple(ctx, msg.Transport, msg.Sender, msg.ThreadID, machineGreeting())
 		return cmd.Args == ""
-	case "raw":
+	case "shell":
 		if strings.TrimSpace(cmd.Args) == "" {
-			r.sendSimple(ctx, msg.Transport, msg.Sender, msg.ThreadID, "Usage: /raw <shell command>")
+			r.sendSimple(ctx, msg.Transport, msg.Sender, msg.ThreadID, "Usage: /shell <command> (requires shell action enabled)")
 			return true
 		}
 		if act, ok := r.actions["shell"]; ok {
@@ -426,7 +426,7 @@ func (r *Runner) handleCommand(ctx context.Context, msg InboundMessage, log *slo
 
 func (r *Runner) preparePrompt(cmd commands.Command, sender string) (string, string) {
 	prompt := cmd.Args
-	if cmd.Name != "run" && cmd.Name != "new" && cmd.Name != "raw" {
+	if cmd.Name != "run" && cmd.Name != "new" && cmd.Name != "shell" {
 		prompt = cmd.Raw
 	}
 

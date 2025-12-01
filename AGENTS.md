@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 
 - `cmd/runner`: main entrypoint that wires config, Nostr client, command router, and Codex runner.
-- `internal/commands`: mini-DSL for DM payloads (`/new`, `/use`, `/raw`, etc.).
+- `internal/commands`: mini-DSL for DM payloads (`/new`, `/use`, `/shell`, etc.).
 - `internal/codex`: thin shell around `codex exec` and session tracking.
 - `internal/config`: YAML parsing and defaults; copy `config.example.yaml` → `config.yaml` and edit there.
 - `internal/nostrclient`: relay connections, DM decrypt/reply, replay protection.

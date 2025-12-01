@@ -8,7 +8,7 @@ Built-ins:
 | `readfile`   | `internal/actions/fs` (readfile)   | `roots[]`, `max_bytes`.                           |
 | `writefile`  | `internal/actions/fs` (writefile)  | `roots[]`, `allow_write`, `max_bytes`.            |
 
-Defaults: if you omit `actions`, a `shell` action is auto-added with safe defaults so `/raw` works out of the box.
+Defaults: none; declare the actions you want exposed.
 
 Add an action:
 1) Create `internal/actions/<name>/` implementing `core.Action`.

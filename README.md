@@ -46,7 +46,7 @@ These are all composable—pick any transport + one agent + any actions in `conf
 
 - `/new [prompt]` — reset session; optional prompt starts a fresh session.
 - `/use <session-id>` — switch to an existing session.
-- `/raw <cmd>` — execute a shell command on the host (working dir defaults to your home directory).
+- `/shell <cmd>` — execute a shell command (only if `shell` action is configured).
 - `/status` — show your active session and last update time.
 - `/help` — recap commands and list available actions.
 - _Anything else_ — treated as a prompt and executed in your active session (or a new one if none).
@@ -105,7 +105,7 @@ These are all composable—pick any transport + one agent + any actions in `conf
 
 ## Running it remotely / outside your LAN
 
-The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/raw` or your own VPN/Tailscale/SSH setup; there is no web UI. Optional health endpoint: run with `-health-listen 127.0.0.1:8081` for `/health` JSON.
+The runner only needs outbound internet for its transport (e.g., Nostr relays). For shell access, rely on actions like `/shell` (if enabled) or your own VPN/Tailscale/SSH setup; there is no web UI. Optional health endpoint: run with `-health-listen 127.0.0.1:8081` for `/health` JSON.
 
 ## Quick links
 
@@ -124,41 +124,14 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - `runner.allowed_pubkeys`: access control.
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
 - `agent.config.*`: CLI-style knobs for the selected agent (binary, working dir, extra args, timeout). `agent.codex` remains as a backward-compatible alias.
-- `actions[]`: host capabilities; if omitted, a default `shell` action is added so `/raw` works.
+- `actions[]`: host capabilities; declare the ones you want (e.g., `shell`, `readfile`, `writefile`).
 - `storage.path`: BoltDB file for state.
 - `logging.level`: `debug|info|warn|error`; `logging.format`: `text|json`.
 
 ## Background service (macOS-friendly)
 
 - tmux: `tmux new -s codex-runner 'cd /Users/honk/code/nostr-codex-runner && make run'`
-- launchd (recommended for “always on”):
-  - Make sure Codex and Node are on PATH (Homebrew defaults live in `/opt/homebrew/bin`). Either set `codex.binary` in `config.yaml` to an absolute path or pass PATH via the plist, e.g.:  ```xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-  <plist version="1.0">
-  <dict>
-    <key>Label</key><string>com.honk.nostr-codex-runner</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/Users/honk/bin/nostr-codex-runner</string>
-      <string>-config</string>
-      <string>/Users/honk/code/nostr-codex-runner/config.yaml</string>
-    </array>
-    <key>EnvironmentVariables</key>
-    <dict>
-      <key>PATH</key>
-      <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-    </dict>
-    <key>WorkingDirectory</key><string>/Users/honk/code/nostr-codex-runner</string>
-    <key>RunAtLoad</key><true/>
-    <key>KeepAlive</key><true/>
-    <key>StandardOutPath</key><string>/Users/honk/Library/Logs/nostr-codex-runner.log</string>
-    <key>StandardErrorPath</key><string>/Users/honk/Library/Logs/nostr-codex-runner.err</string>
-  </dict>
-  </plist>
-  ```
-
-  Load/restart:
+- launchd (recommended for "always on"): Create a plist file at `~/Library/LaunchAgents/com.honk.nostr-codex-runner.plist` with your configuration. Make sure Codex and Node are on PATH (Homebrew defaults live in `/opt/homebrew/bin`). Either set `codex.binary` in `config.yaml` to an absolute path or pass PATH via the plist `EnvironmentVariables` dict. Load/restart with:
 
   ```bash
   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.honk.nostr-codex-runner.plist

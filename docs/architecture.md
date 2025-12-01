@@ -20,7 +20,7 @@ Interfaces (in `internal/core/types.go`):
 
 Core runner (in `internal/core/runner.go`):
 1. Transports push `InboundMessage` into the runner.
-2. Runner parses command DSL (help/status/new/use/raw) and/or forwards prompt to Agent.
+2. Runner parses command DSL (help/status/new/use/shell) and/or forwards prompt to Agent.
 3. Agent may request `ActionCalls`; runner enforces allowlists and timeouts, executes actions, appends results.
 4. Runner sends `OutboundMessage` via the same transport.
 

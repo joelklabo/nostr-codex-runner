@@ -43,7 +43,7 @@ From an allowed Nostr pubkey, DM the runner:
 ```
 /new
 List the last 3 git commits in this repo.
-/raw ls -la
+/shell ls -la          # requires shell action enabled in config
 ```
 Replies come back over Nostr with the same session id.
 

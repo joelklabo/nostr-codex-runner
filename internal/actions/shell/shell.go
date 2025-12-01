@@ -80,7 +80,7 @@ func (a *Action) Invoke(ctx context.Context, args json.RawMessage) (json.RawMess
 	text = truncate(text, a.cfg.MaxOutput)
 	encoded, _ := json.Marshal(text)
 	if err != nil {
-		return json.RawMessage(fmt.Sprintf("\"/raw exit=%d\\n%s\"", exitCode(err), escapeJSONString(text))), nil
+		return json.RawMessage(fmt.Sprintf("\"/shell exit=%d\\n%s\"", exitCode(err), escapeJSONString(text))), nil
 	}
 	return json.RawMessage(encoded), nil
 }
