@@ -58,7 +58,6 @@ buddy help                     show help
 1) argv `-config` path (or positional in future)
 2) `./config.yaml`
 3) `~/.config/buddy/config.yaml`
-4) Legacy: `NCR_CONFIG` env and `~/.config/nostr-codex-runner/config.yaml` (supported with warning for one release)
 
 ## Docs
 - Docs index: `docs/index-ia.md` (user vs contributor landing) – to be published
@@ -69,7 +68,7 @@ buddy help                     show help
 - Presets: `docs/presets.md`
 
 ## Contributing
-- Issues tracked with `bd` (epic `nostr-codex-runner-3oa`); one commit per issue.
+- Issues tracked with `bd` (epic ` buddy-3oa`); one commit per issue.
 - Go 1.24+, `go test ./...` before pushing.
 - See `CONTRIBUTING.md` and `docs/style-guide.md`.
 - New here? Start with `buddy run mock-echo`, then pick a tiny doc fix or preset tweak and open a PR. Friendly reviews welcome.
