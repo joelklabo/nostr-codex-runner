@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,7 +33,7 @@ jobs:
           tags: buddy:${{ github.sha }}
           outputs: type=oci,dest=/tmp/image.tar
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: image-${{ matrix.name }}
           path: /tmp/image.tar
