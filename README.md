@@ -16,6 +16,7 @@ brew install joelklabo/tap/buddy           # Homebrew (macOS/Linux)
 # or
 curl -fsSL https://get.buddy.sh | sh       # script installer (downloads release, verifies checksum)
 ```
+![Quick install screenshot](assets/screenshot-readme-quickstart.png)
 
 ## Quick start — 3 steps
 
