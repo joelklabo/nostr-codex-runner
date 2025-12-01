@@ -115,6 +115,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - [Release workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
 - [Recipe: Nostr + Copilot CLI](docs/recipes/nostr-copilot-cli.md)
 - [Recipe: WhatsApp + Codex](docs/recipes/whatsapp-codex.md)
+- [Recipe: systemd service](docs/recipes/systemd.md)
 
 ## Configuration reference (plugins)
 
