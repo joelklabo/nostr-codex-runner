@@ -42,12 +42,16 @@ func main() {
 		fmt.Printf("%s\n", buildVersion())
 		return
 	case "help", "-h", "--help":
-		usage()
+		printHelp(args)
 		return
 	case "wizard":
 		if err := runWizard(args); err != nil {
 			fatalf(err.Error())
 		}
+		return
+	case "presets":
+		// stub until preset registry wired
+		fmt.Println("presets command not yet implemented; coming soon.")
 		return
 	case "run":
 		if err := runContext(context.Background(), args); err != nil {
@@ -182,6 +186,9 @@ func parseSubcommand(args []string) (string, []string) {
 		return "run", args
 	}
 	first := args[0]
+	if first == "presets" {
+		return "presets", args[1:]
+	}
 	if strings.HasPrefix(first, "-") {
 		return "run", args
 	}
@@ -215,14 +222,14 @@ func defaultConfigPath() string {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "Usage:\n")
-	fmt.Fprintf(os.Stderr, "  buddy run [-config path] [-health-listen addr] [-metrics-listen addr]\n")
-	fmt.Fprintf(os.Stderr, "  buddy wizard [config-path]\n")
-	fmt.Fprintf(os.Stderr, "  buddy version\n")
-	fmt.Fprintf(os.Stderr, "  buddy help\n\n")
-	fmt.Fprintf(os.Stderr, "Environment:\n")
-	fmt.Fprintf(os.Stderr, "  %s\tdefault config path (overrides -config default)\n", envConfigNew)
-	fmt.Fprintf(os.Stderr, "  %s\tlegacy default config path (deprecated)\n", envConfigLegacy)
+	fmt.Fprintf(os.Stderr, "Usage: buddy <command> [args]\n")
+	fmt.Fprintf(os.Stderr, "Commands:\n")
+	fmt.Fprintf(os.Stderr, "  run <preset|config>       start the runner\n")
+	fmt.Fprintf(os.Stderr, "  wizard [config-path]      guided setup; supports dry-run\n")
+	fmt.Fprintf(os.Stderr, "  presets [name]            list built-in presets or show one\n")
+	fmt.Fprintf(os.Stderr, "  version                   show version\n")
+	fmt.Fprintf(os.Stderr, "  help [command]            show help\n\n")
+	fmt.Fprintf(os.Stderr, "Env: %s (preferred), %s (legacy)\n", envConfigNew, envConfigLegacy)
 }
 
 func fileExists(path string) bool {
@@ -280,4 +287,28 @@ func collectCompatWarnings(configPath string) []string {
 		warnings = append(warnings, "binary name nostr-codex-runner is deprecated; prefer buddy/nostr-buddy")
 	}
 	return warnings
+}
+
+func printHelp(args []string) {
+	if len(args) == 0 {
+		usage()
+		return
+	}
+	switch args[0] {
+	case "run":
+		fmt.Println("buddy run <preset|config> - start the runner using a preset or YAML config")
+		fmt.Println("Flags:")
+		fmt.Println("  -config <path>          config file path (default search: argv, ./config.yaml, ~/.config/buddy/config.yaml)")
+		fmt.Println("  -health-listen <addr>   optional health endpoint (e.g., 127.0.0.1:8081)")
+		fmt.Println("  -metrics-listen <addr>  optional Prometheus metrics endpoint")
+	case "wizard":
+		fmt.Println("buddy wizard [config-path] - guided setup; writes config or dry-runs")
+		fmt.Println("Prompts for relays/keys/allowed pubkeys, agent choice, actions.")
+	case "presets":
+		fmt.Println("buddy presets [name] - list built-in presets or show one (coming soon).")
+	case "version":
+		fmt.Println("buddy version - print version")
+	default:
+		usage()
+	}
 }
