@@ -1,7 +1,7 @@
 # buddy — friendly transport → agent → actions runner
 
 <div align="center" style="background:#000;padding:18px;border-radius:12px">
-  <img src="assets/social-preview.svg" alt="buddy logo" width="320">
+  <img src="assets/buddy.png" alt="buddy logo" width="320">
 </div>
 
 Binary-first, wizard-assisted CLI that turns messages (Nostr by default, mock offline) into agent actions in minutes.
@@ -24,7 +24,7 @@ brew install joelklabo/tap/buddy
 # or script (downloads release, verifies checksum)
 curl -fsSL https://get.buddy.sh | sh
 ```
-Homebrew tap `joelklabo/tap` is published by this repo’s releases—nothing else to set up.
+Homebrew tap `joelklabo/tap` is published by this repo’s releases—no extra setup needed.
 
 ## Quick start (wizard-first)
 1) Run `buddy wizard` → choose preset, enter relays/keys; writes `~/.config/buddy/config.yaml`.

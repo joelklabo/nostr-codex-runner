@@ -6,7 +6,7 @@ Purpose: Single-page content (can be GitHub Pages or README front) highlighting 
 - Headline: “Run AI agents in minutes.”
 - Subhead: “Binary-first CLI with presets, wizard, and safe defaults.”
 - Buttons: `brew install joelklabo/tap/buddy`, `buddy wizard`, `buddy run claude-dm` (or `mock-echo` offline).
-- ![Landing hero screenshot](../assets/screenshot-landing-hero.png)
+- <div align="center" style="background:#000;padding:18px;border-radius:12px"><img src="../assets/buddy.png" alt="buddy logo" width="320"></div>
 
 ## Proof/Badges
 - CI, Release, Coverage badges (reuse README).
