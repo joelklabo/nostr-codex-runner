@@ -323,9 +323,10 @@ func printHelp(args []string) {
 		fmt.Println("  -health-listen <addr>   optional health endpoint (e.g., 127.0.0.1:8081)")
 		fmt.Println("  -metrics-listen <addr>  optional Prometheus metrics endpoint")
 		fmt.Println("Examples:")
-		fmt.Println("  buddy run mock-echo")
-		fmt.Println("  buddy run claude-dm")
-		fmt.Println("  buddy run path/to/config.yaml")
+		fmt.Println("  buddy run mock-echo                 # offline smoke test")
+		fmt.Println("  buddy run claude-dm                 # Nostr → Claude/OpenAI HTTP")
+		fmt.Println("  buddy run copilot-shell             # Copilot + shell (trusted operators only)")
+		fmt.Println("  buddy run path/to/config.yaml       # load your own YAML")
 	case "wizard":
 		fmt.Println("buddy wizard [config-path] - guided setup; writes config or dry-runs")
 		fmt.Println("Prompts for relays/keys/allowed pubkeys, agent choice, actions.")
@@ -334,9 +335,9 @@ func printHelp(args []string) {
 	case "presets":
 		fmt.Println("buddy presets [name] - list built-in presets or show one.")
 		fmt.Println("Examples:")
-		fmt.Println("  buddy presets")
-		fmt.Println("  buddy presets claude-dm")
-		fmt.Println("  buddy presets claude-dm --yaml")
+		fmt.Println("  buddy presets                         # list all presets")
+		fmt.Println("  buddy presets claude-dm               # show summary and how to run")
+		fmt.Println("  buddy presets claude-dm --yaml        # print the YAML")
 	case "version":
 		fmt.Println("buddy version - print version")
 	default:
