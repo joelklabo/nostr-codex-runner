@@ -1,0 +1,24 @@
+name: Homebrew Tap Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  brew-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Brew update
+        run: brew update
+      - name: Tap joelklabo/tap
+        run: brew tap joelklabo/tap
+      - name: Brew info buddy
+        run: brew info buddy
+      - name: Brew install buddy
+        run: brew install joelklabo/tap/buddy
+      - name: buddy version
+        run: buddy --version

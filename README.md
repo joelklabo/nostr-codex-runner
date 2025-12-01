@@ -10,6 +10,8 @@ Binary-first, wizard-assisted CLI that turns messages (Nostr by default, mock of
 [![Release](https://github.com/joelklabo/buddy/actions/workflows/release.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/release.yml)
 [![Coverage](https://github.com/joelklabo/buddy/actions/workflows/coverage.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/coverage.yml)
 [![Staticcheck](https://github.com/joelklabo/buddy/actions/workflows/staticcheck.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/staticcheck.yml)
+[![Markdown lint](https://github.com/joelklabo/buddy/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/markdownlint.yml)
+[![Homebrew tap](https://github.com/joelklabo/buddy/actions/workflows/homebrew-check.yml/badge.svg)](https://github.com/joelklabo/buddy/actions/workflows/homebrew-check.yml)
 [![Go](https://img.shields.io/badge/go-1.24%2B-00ADD8)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#license)
 
