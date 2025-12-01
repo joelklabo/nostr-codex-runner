@@ -13,8 +13,8 @@ runner:
   session_timeout_minutes: 240
   initial_prompt: |
     You are an AI agent with shell access to this machine via Codex. Be concise and careful.
-  profile_name: "nostr-codex-runner"
-  profile_image: "https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/assets/social-preview.svg"
+  profile_name: "buddy"
+  profile_image: "https://raw.githubusercontent.com/joelklabo/buddy/main/assets/social-preview.svg"
 
 codex:
   binary: "/opt/homebrew/bin/codex"

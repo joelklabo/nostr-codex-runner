@@ -14,7 +14,7 @@ cp config.example.yaml ~/.config/buddy/config.yaml
 ## 2) Install the unit
 
 ```bash
-sudo cp scripts/systemd/nostr-codex-runner.service /etc/systemd/system/nostr-buddy@${USER}.service
+sudo cp scripts/systemd/buddy.service /etc/systemd/system/nostr-buddy@${USER}.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now nostr-buddy@${USER}.service
 ```
