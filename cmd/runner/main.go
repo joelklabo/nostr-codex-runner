@@ -181,7 +181,7 @@ func defaultConfigPath() string {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n")
-	fmt.Fprintf(os.Stderr, "  nostr-codex-runner run [-config path] [-health-listen addr]\n")
+	fmt.Fprintf(os.Stderr, "  nostr-codex-runner run [-config path] [-health-listen addr] [-metrics-listen addr]\n")
 	fmt.Fprintf(os.Stderr, "  nostr-codex-runner version\n\n")
 	fmt.Fprintf(os.Stderr, "Environment:\n")
 	fmt.Fprintf(os.Stderr, "  %s\tdefault config path (overrides -config default)\n", envConfig)
