@@ -28,7 +28,10 @@ var (
 	runnerPID = os.Getpid()
 )
 
-const envConfig = "NCR_CONFIG"
+const (
+	envConfigNew    = "BUDDY_CONFIG"
+	envConfigLegacy = "NCR_CONFIG"
+)
 
 func main() {
 	subcmd, args := parseSubcommand(os.Args[1:])
@@ -50,7 +53,7 @@ func main() {
 
 func runContext(parent context.Context, args []string) error {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
-	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml")
+	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml (defaults: BUDDY_CONFIG env, ./config.yaml, ~/.config/buddy/config.yaml)")
 	healthListen := fs.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
 	metricsListen := fs.String("metrics-listen", "", "Optional Prometheus metrics listen addr (e.g., 127.0.0.1:9090)")
 	if err := fs.Parse(args); err != nil {
@@ -173,8 +176,27 @@ func parseSubcommand(args []string) (string, []string) {
 }
 
 func defaultConfigPath() string {
-	if v := os.Getenv(envConfig); v != "" {
+	if v := os.Getenv(envConfigNew); v != "" {
 		return v
+	}
+	if v := os.Getenv(envConfigLegacy); v != "" {
+		return v
+	}
+	// cwd config wins if present
+	if fileExists("config.yaml") {
+		return "config.yaml"
+	}
+	home, err := os.UserHomeDir()
+	if err == nil {
+		newPath := filepath.Join(home, ".config", "buddy", "config.yaml")
+		if fileExists(newPath) {
+			return newPath
+		}
+		legacyPath := filepath.Join(home, ".config", "nostr-codex-runner", "config.yaml")
+		if fileExists(legacyPath) {
+			return legacyPath
+		}
+		return newPath
 	}
 	return "config.yaml"
 }
@@ -184,5 +206,11 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "  nostr-codex-runner run [-config path] [-health-listen addr] [-metrics-listen addr]\n")
 	fmt.Fprintf(os.Stderr, "  nostr-codex-runner version\n\n")
 	fmt.Fprintf(os.Stderr, "Environment:\n")
-	fmt.Fprintf(os.Stderr, "  %s\tdefault config path (overrides -config default)\n", envConfig)
+	fmt.Fprintf(os.Stderr, "  %s\tdefault config path (overrides -config default)\n", envConfigNew)
+	fmt.Fprintf(os.Stderr, "  %s\tlegacy default config path (deprecated)\n", envConfigLegacy)
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

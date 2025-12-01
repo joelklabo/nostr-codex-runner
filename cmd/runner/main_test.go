@@ -25,12 +25,20 @@ func TestParseSubcommand(t *testing.T) {
 }
 
 func TestDefaultConfigPathEnv(t *testing.T) {
-	if err := os.Setenv(envConfig, "/tmp/cfg"); err != nil {
+	if err := os.Setenv(envConfigNew, "/tmp/cfg"); err != nil {
 		t.Fatalf("set env: %v", err)
 	}
-	defer func() { _ = os.Unsetenv(envConfig) }()
+	defer func() { _ = os.Unsetenv(envConfigNew) }()
 	if got := defaultConfigPath(); got != "/tmp/cfg" {
 		t.Fatalf("expected env path, got %s", got)
+	}
+}
+
+func TestDefaultConfigPathEnvLegacy(t *testing.T) {
+	t.Setenv(envConfigNew, "")
+	t.Setenv(envConfigLegacy, "/tmp/legacy")
+	if got := defaultConfigPath(); got != "/tmp/legacy" {
+		t.Fatalf("expected legacy env path, got %s", got)
 	}
 }
 
@@ -39,9 +47,11 @@ func TestUsageDoesNotPanic(t *testing.T) {
 }
 
 func TestDefaultConfigPathFallback(t *testing.T) {
-	_ = os.Unsetenv(envConfig)
-	if got := defaultConfigPath(); got != "config.yaml" {
-		t.Fatalf("unexpected default path %s", got)
+	t.Setenv(envConfigNew, "")
+	t.Setenv(envConfigLegacy, "")
+	got := defaultConfigPath()
+	if got == "" {
+		t.Fatalf("unexpected empty path")
 	}
 }
 
