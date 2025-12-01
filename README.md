@@ -71,6 +71,7 @@ buddy help                     show help
 - **Do I need Go to use it?** No. Install a release (brew or script) and run presets; build from source is optional.
 - **Is shell safe?** Shell is powerful and risky—use `mock-echo` or `claude-dm` first, and keep `allowed_pubkeys` tight before enabling shell.
 - **Where do configs live?** By default `~/.config/buddy/config.yaml`; presets are built-in but can be overridden under `~/.config/buddy/presets/`.
+- **Is there a short alias?** We ship only `buddy` to avoid colliding with other tools; if you want `bud`, create your own shell alias or symlink.
 
 ## License
 MIT
