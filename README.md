@@ -61,9 +61,8 @@ These are all composable—pick any transport + one agent + any actions in `conf
 2. Run locally:
 
    ```bash
-   make run              # uses config.yaml
-   # or
-   CONFIG=path/to/config.yaml ./scripts/run.sh
+   nostr-codex-runner run -config config.yaml   # or set NCR_CONFIG=path/to/config.yaml
+   # make run still works if you prefer
    ```
 
 3. DM the runner pubkey from an allowed pubkey. Examples:
@@ -89,7 +88,7 @@ These are all composable—pick any transport + one agent + any actions in `conf
 ## Install
 
 - From source: `go install github.com/joelklabo/nostr-codex-runner/cmd/runner@latest`
-- From release binaries (macOS/Linux amd64/arm64): grab the asset from the GitHub Releases page, `chmod +x nostr-codex-runner-*`, and run `./nostr-codex-runner --config config.yaml`.
+- From release binaries (macOS/Linux amd64/arm64): grab the asset from the GitHub Releases page, `chmod +x nostr-codex-runner-*`, and run `./nostr-codex-runner run -config config.yaml`.
 - Docker image is not published yet; use the binary or source builds above.
 - One-liner installer (downloads latest release to `~/.local/bin` and copies `config.example.yaml` → `config.yaml` if missing):
 

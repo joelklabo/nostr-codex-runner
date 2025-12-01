@@ -22,20 +22,40 @@ import (
 )
 
 var (
-	buildVer     = "dev"
-	hostName     = "unknown"
-	runnerPID    = os.Getpid()
-	versionFlag  = flag.Bool("version", false, "Print version and exit")
-	healthListen = flag.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
+	buildVer  = "dev"
+	hostName  = "unknown"
+	runnerPID = os.Getpid()
 )
 
-func main() {
-	configPath := flag.String("config", "config.yaml", "Path to config.yaml")
-	flag.Parse()
+const envConfig = "NCR_CONFIG"
 
-	if *versionFlag {
+func main() {
+	subcmd, args := parseSubcommand(os.Args[1:])
+
+	switch subcmd {
+	case "version":
 		fmt.Printf("%s\n", buildVersion())
 		return
+	case "run":
+		run(args)
+	default:
+		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", subcmd)
+		usage()
+		os.Exit(2)
+	}
+}
+
+func run(args []string) {
+	fs := flag.NewFlagSet("run", flag.ExitOnError)
+	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml")
+	healthListen := fs.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
+	if err := fs.Parse(args); err != nil {
+		fatalf(err.Error())
+	}
+	if fs.NArg() > 0 {
+		fmt.Fprintf(os.Stderr, "unexpected arguments: %v\n\n", fs.Args())
+		usage()
+		os.Exit(2)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -131,4 +151,30 @@ func printBanner(cfg *config.Config, pubKey string, version string) {
 	fmt.Printf("pid %d • host %s • go %s\n", runnerPID, hostName, runtime.Version())
 	fmt.Printf("config loaded\n")
 	fmt.Printf("==============================\n\n")
+}
+
+func parseSubcommand(args []string) (string, []string) {
+	if len(args) == 0 {
+		return "run", args
+	}
+	first := args[0]
+	if strings.HasPrefix(first, "-") {
+		return "run", args
+	}
+	return first, args[1:]
+}
+
+func defaultConfigPath() string {
+	if v := os.Getenv(envConfig); v != "" {
+		return v
+	}
+	return "config.yaml"
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage:\n")
+	fmt.Fprintf(os.Stderr, "  nostr-codex-runner run [-config path] [-health-listen addr]\n")
+	fmt.Fprintf(os.Stderr, "  nostr-codex-runner version\n\n")
+	fmt.Fprintf(os.Stderr, "Environment:\n")
+	fmt.Fprintf(os.Stderr, "  %s\tdefault config path (overrides -config default)\n", envConfig)
 }
