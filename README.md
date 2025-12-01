@@ -40,10 +40,10 @@ curl -fsSL https://get.buddy.sh | sh
 
 ```mermaid
 flowchart LR
-  A[Allowed sender DM "/new top process?"] -->|Nostr| B(buddy runner)
-  B --> C[Agent: Claude / OpenAI / Copilot / local]
-  C --> D[Action: shell / readfile / writefile]
-  D --> E[Reply to sender]
+  A["Allowed sender DM /new top process?"] -->|Nostr| B["buddy runner"]
+  B --> C["Agent: Claude / OpenAI / Copilot / local"]
+  C --> D["Action: shell / readfile / writefile"]
+  D --> E["Reply to sender"]
 ```
 
 - Transports: Nostr DMs (default) or mock; others pluggable.
