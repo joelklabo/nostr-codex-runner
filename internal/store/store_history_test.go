@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 func TestHistoryAppendAndTrim(t *testing.T) {
@@ -46,6 +47,30 @@ func TestAuditAppend(t *testing.T) {
 	}
 	if len(entries) != 2 {
 		t.Fatalf("expected 2 entries, got %d", len(entries))
+	}
+}
+
+func TestAlreadyProcessedAndRecentMessage(t *testing.T) {
+	st, cleanup := newTempStore(t)
+	defer cleanup()
+
+	if seen, err := st.AlreadyProcessed("e1"); err != nil || seen {
+		t.Fatalf("first seen unexpected: %v %v", seen, err)
+	}
+	if seen, _ := st.AlreadyProcessed("e1"); !seen {
+		t.Fatalf("second should be seen")
+	}
+	if err := st.MarkProcessed("e2"); err != nil {
+		t.Fatalf("mark processed: %v", err)
+	}
+
+	seen, err := st.RecentMessageSeen("alice", "hello", time.Minute)
+	if err != nil || seen {
+		t.Fatalf("first recent should be false")
+	}
+	seen, _ = st.RecentMessageSeen("alice", "hello", time.Minute)
+	if !seen {
+		t.Fatalf("second recent should be true")
 	}
 }
 

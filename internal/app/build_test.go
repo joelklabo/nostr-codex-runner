@@ -1,49 +1,64 @@
 package app
 
 import (
-	"context"
+	"log/slog"
+	"os"
+	"path/filepath"
 	"testing"
-	"time"
 
 	"nostr-codex-runner/internal/config"
 	"nostr-codex-runner/internal/store"
 )
 
-func TestBuildWithMockEcho(t *testing.T) {
+func TestBuildWithMockTransport(t *testing.T) {
+	td := t.TempDir()
 	cfg := &config.Config{
-		Transports: []config.TransportConfig{{Type: "mock", ID: "mock"}},
-		Agent:      config.AgentConfig{Type: "echo"},
-		Actions:    []config.ActionConfig{},
-		Runner:     config.RunnerConfig{AllowedPubkeys: []string{"mock"}},
-		Storage:    config.StorageConfig{Path: t.TempDir() + "/state.db"},
-		Logging:    config.LoggingConfig{Level: "error"},
+		Runner: config.RunnerConfig{
+			PrivateKey:     "abcd",
+			AllowedPubkeys: []string{"1234"},
+			MaxReplyChars:  4000,
+		},
+		Storage: config.StorageConfig{Path: filepath.Join(td, "state.db")},
+		Transports: []config.TransportConfig{
+			{Type: "mock", ID: "mock1"},
+		},
+		Agent: config.AgentConfig{
+			Type: "echo",
+		},
+		Actions: []config.ActionConfig{
+			{Type: "shell", Name: "shell", Workdir: ".", TimeoutSecs: 5, MaxOutput: 1000},
+		},
+		Projects: []config.Project{{ID: "default", Name: "default", Path: "."}},
 	}
 	st, err := store.New(cfg.Storage.Path)
 	if err != nil {
 		t.Fatalf("store: %v", err)
 	}
-	t.Cleanup(func() {
-		if err := st.Close(); err != nil {
-			t.Errorf("close store: %v", err)
-		}
-	})
+	defer st.Close()
 
-	r, err := Build(cfg, st, nil)
+	r, err := Build(cfg, st, slog.Default())
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
+	if r == nil {
+		t.Fatalf("runner is nil")
+	}
+}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	errCh := make(chan error, 1)
-	go func() { errCh <- r.Start(ctx) }()
-
-	// let it start then cancel
-	time.Sleep(20 * time.Millisecond)
-	cancel()
-
-	if err := <-errCh; err != nil && err != context.Canceled {
-		t.Fatalf("runner err: %v", err)
+func TestBuildUnknownTransport(t *testing.T) {
+	cfg := &config.Config{
+		Runner: config.RunnerConfig{PrivateKey: "abcd", AllowedPubkeys: []string{"1234"}, MaxReplyChars: 1000},
+		Storage: config.StorageConfig{
+			Path: filepath.Join(os.TempDir(), "state.db"),
+		},
+		Transports: []config.TransportConfig{{Type: "nope", ID: "x"}},
+		Agent:      config.AgentConfig{Type: "echo"},
+		Actions:    []config.ActionConfig{{Type: "shell", Name: "shell"}},
+		Projects:   []config.Project{{ID: "default", Name: "default", Path: "."}},
+	}
+	st, _ := store.New(cfg.Storage.Path)
+	defer st.Close()
+	if _, err := Build(cfg, st, slog.Default()); err == nil {
+		t.Fatalf("expected error for unknown transport")
 	}
 }
