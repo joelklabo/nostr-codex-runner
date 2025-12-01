@@ -11,6 +11,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"gopkg.in/yaml.v3"
 
+	"github.com/joelklabo/buddy/internal/check"
 	"github.com/joelklabo/buddy/internal/config"
 	"github.com/joelklabo/buddy/internal/presets"
 )
@@ -154,6 +155,10 @@ func Run(ctx context.Context, path string, p Prompter) (string, error) {
 		return cfgPath, nil
 	}
 
+	if err := wizardPreflight(cfg, presetChoice, p); err != nil {
+		return "", err
+	}
+
 	if err := writeConfig(cfgPath, cfg); err != nil {
 		return "", err
 	}
@@ -209,6 +214,54 @@ func defaultStatePath() string {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+// wizardPreflight runs dependency checks and optionally asks whether to continue on missing deps.
+func wizardPreflight(cfg *config.Config, presetName string, p Prompter) error {
+	deps := check.AggregateDeps(cfg, presetName, presets.PresetDeps())
+	if len(deps) == 0 {
+		return nil
+	}
+	checkers := map[string]check.Checker{
+		"binary": check.BinaryChecker{},
+		"env":    check.EnvChecker{},
+		"file":   check.FileChecker{},
+		"url":    check.URLChecker{},
+		"port":   check.PortChecker{},
+	}
+
+	var missing int
+	for _, d := range deps {
+		chk, ok := checkers[d.Type]
+		if !ok {
+			continue
+		}
+		res := chk.Check(check.DepInput{
+			Name:     d.Name,
+			Type:     d.Type,
+			Version:  d.Version,
+			Optional: d.Optional,
+			Hint:     d.Hint,
+		})
+		switch res.Status {
+		case "MISSING":
+			missing++
+			fmt.Printf("❌ %s (%s) — %s\n", res.Name, res.Type, res.Details)
+		case "WARN":
+			fmt.Printf("⚠️  %s (%s) — %s\n", res.Name, res.Type, res.Details)
+		}
+	}
+
+	if missing > 0 {
+		cont, err := p.AskConfirm("Missing required dependencies. Continue anyway?", false)
+		if err != nil {
+			return err
+		}
+		if !cont {
+			return fmt.Errorf("aborted: required dependencies missing")
+		}
+	}
+	return nil
 }
 
 // surveyPrompter is the real interactive implementation.

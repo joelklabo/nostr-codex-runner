@@ -340,6 +340,7 @@ func printHelp(args []string) {
 		fmt.Println("  -config <path>          config file path (default search: argv, ./config.yaml, ~/.config/buddy/config.yaml)")
 		fmt.Println("  -health-listen <addr>   optional health endpoint (e.g., 127.0.0.1:8081)")
 		fmt.Println("  -metrics-listen <addr>  optional Prometheus metrics endpoint")
+		fmt.Println("  -skip-check             skip dependency preflight")
 		fmt.Println("Examples:")
 		fmt.Println("  buddy run mock-echo                 # offline smoke test")
 		fmt.Println("  buddy run claude-dm                 # Nostr → Claude/OpenAI HTTP")
