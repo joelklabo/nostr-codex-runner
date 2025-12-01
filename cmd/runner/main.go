@@ -85,10 +85,11 @@ func runContext(parent context.Context, args []string) error {
 		return err
 	}
 	var positional string
+	// Allow one positional argument for preset or config path.
 	if fs.NArg() > 1 {
-		fmt.Fprintf(os.Stderr, "unexpected arguments: %v\n\n", fs.Args())
-		usage()
-		return fmt.Errorf("unexpected arguments: %v", fs.Args())
+		fmt.Fprintf(os.Stderr, "too many arguments: %v\n\n", fs.Args())
+		printHelp([]string{"run"})
+		return fmt.Errorf("too many arguments: %v", fs.Args())
 	}
 	if fs.NArg() == 1 {
 		positional = fs.Arg(0)
@@ -202,13 +203,15 @@ func parseSubcommand(args []string) (string, []string) {
 		return "run", args
 	}
 	first := args[0]
-	if first == "presets" {
-		return "presets", args[1:]
+	switch first {
+	case "presets", "wizard", "init-config", "check", "version", "help", "run":
+		return first, args[1:]
 	}
 	if strings.HasPrefix(first, "-") {
 		return "run", args
 	}
-	return first, args[1:]
+	// Treat unknown-first-token as positional preset/config for run.
+	return "run", args
 }
 
 func defaultConfigPath() string {
