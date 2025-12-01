@@ -1,0 +1,30 @@
+name: Homebrew Tap Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  brew-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Brew update
+        run: brew update
+      - name: Tap joelklabo/tap
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: brew tap joelklabo/tap https://${HOMEBREW_GITHUB_API_TOKEN}@github.com/joelklabo/homebrew-tap
+      - name: Brew info buddy
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: brew info buddy
+      - name: Brew install buddy
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: brew install joelklabo/tap/buddy
+      - name: buddy version
+        run: buddy --version
