@@ -34,6 +34,9 @@ func TestRegistryRegistersAndBuilds(t *testing.T) {
 	if tr.ID() != "x" {
 		t.Fatalf("unexpected id %s", tr.ID())
 	}
+	if kinds := RegisteredTypes(); len(kinds) != 1 || kinds[0] != "fake" {
+		t.Fatalf("registered types mismatch %v", kinds)
+	}
 }
 
 func TestRegistryDuplicate(t *testing.T) {
@@ -47,4 +50,19 @@ func TestRegistryDuplicate(t *testing.T) {
 	if err := Register("dup", nil); err == nil {
 		t.Fatalf("expected duplicate error")
 	}
+}
+
+func TestMustRegisterPanics(t *testing.T) {
+	t.Cleanup(func() {
+		registryMu.Lock()
+		registry = make(map[string]Constructor)
+		registryMu.Unlock()
+	})
+	MustRegister("z", func(cfg any) (core.Transport, error) { return &fakeTransport{id: "z"}, nil })
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatalf("expected panic on duplicate")
+		}
+	}()
+	MustRegister("z", nil)
 }

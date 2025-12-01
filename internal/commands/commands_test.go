@@ -9,7 +9,11 @@ func TestParseCommands(t *testing.T) {
 		args string
 	}{
 		{"/new start fresh", "new", "start fresh"},
+		{"new start", "new", "start"},
+		{"/reset wiped", "new", "wiped"},
+		{"reset again", "new", "again"},
 		{"/use abc123", "use", "abc123"},
+		{"use abc123", "use", "abc123"},
 		{"/status", "status", ""},
 		{"/help", "help", ""},
 		{"/shell ls -la", "shell", "ls -la"},

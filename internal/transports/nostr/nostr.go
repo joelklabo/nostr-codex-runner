@@ -22,8 +22,13 @@ type Config struct {
 type Transport struct {
 	cfg    Config
 	store  *store.Store
-	client *client.Client
+	client nostrClient
 	id     string
+}
+
+type nostrClient interface {
+	Listen(ctx context.Context, handler func(context.Context, client.IncomingMessage)) error
+	SendReply(ctx context.Context, toPubKey string, message string) error
 }
 
 // New creates a Nostr transport.

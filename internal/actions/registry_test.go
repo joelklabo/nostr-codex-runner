@@ -34,6 +34,9 @@ func TestActionRegistry(t *testing.T) {
 	if act.Name() != "fake" {
 		t.Fatalf("unexpected name %s", act.Name())
 	}
+	if names := RegisteredNames(); len(names) != 1 || names[0] != "fake" {
+		t.Fatalf("registered names mismatch: %v", names)
+	}
 }
 
 func TestActionRegistryDuplicate(t *testing.T) {
@@ -46,4 +49,19 @@ func TestActionRegistryDuplicate(t *testing.T) {
 	if err := Register("dup", nil); err == nil {
 		t.Fatalf("expected duplicate error")
 	}
+}
+
+func TestMustRegisterPanicsOnDuplicate(t *testing.T) {
+	t.Cleanup(func() {
+		registryMu.Lock()
+		registry = make(map[string]Constructor)
+		registryMu.Unlock()
+	})
+	MustRegister("a", func(cfg any) (core.Action, error) { return &fakeAction{name: "a"}, nil })
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatalf("expected panic on duplicate")
+		}
+	}()
+	MustRegister("a", nil)
 }

@@ -2,6 +2,7 @@ package nostrclient
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -133,6 +134,35 @@ func (p *stubPool) PublishMany(ctx context.Context, relays []string, ev nostr.Ev
 	return out
 }
 
+type errPool struct{}
+
+func (p errPool) SubscribeMany(ctx context.Context, relays []string, filter nostr.Filter, _ ...nostr.SubscriptionOption) chan nostr.RelayEvent {
+	ch := make(chan nostr.RelayEvent)
+	close(ch)
+	return ch
+}
+
+func (p errPool) PublishMany(ctx context.Context, relays []string, ev nostr.Event) chan nostr.PublishResult {
+	ch := make(chan nostr.PublishResult, 1)
+	ch <- nostr.PublishResult{Error: errors.New("publish boom")}
+	close(ch)
+	return ch
+}
+
+type okPool struct{}
+
+func (p okPool) SubscribeMany(ctx context.Context, relays []string, filter nostr.Filter, _ ...nostr.SubscriptionOption) chan nostr.RelayEvent {
+	ch := make(chan nostr.RelayEvent)
+	close(ch)
+	return ch
+}
+func (p okPool) PublishMany(ctx context.Context, relays []string, ev nostr.Event) chan nostr.PublishResult {
+	ch := make(chan nostr.PublishResult, 1)
+	ch <- nostr.PublishResult{}
+	close(ch)
+	return ch
+}
+
 func TestListenProcessesInbound(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	pub, _ := nostr.GetPublicKey(priv)
@@ -160,5 +190,69 @@ func TestListenProcessesInbound(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatalf("timeout")
+	}
+}
+
+func TestSendReplyPublishesErrors(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := NewWithPool(priv, pub, []string{"wss://relay"}, []string{pub}, newStore(t), errPool{})
+
+	err := c.SendReply(context.Background(), pub, "hi")
+	if err == nil || err.Error() != "publish boom" {
+		t.Fatalf("expected publish error, got %v", err)
+	}
+}
+
+func TestPublishProfileSkipsEmpty(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := NewWithPool(priv, pub, nil, nil, newStore(t), errPool{})
+	if err := c.PublishProfile(context.Background(), "", ""); err != nil {
+		t.Fatalf("expected nil with empty meta, got %v", err)
+	}
+}
+
+func TestPublishProfilePropagatesError(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := NewWithPool(priv, pub, []string{"wss://relay"}, []string{pub}, newStore(t), errPool{})
+	if err := c.PublishProfile(context.Background(), "runner", "pic"); err == nil {
+		t.Fatalf("expected publish error")
+	}
+}
+
+func TestSendReplySuccess(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := NewWithPool(priv, pub, []string{"wss://relay"}, []string{pub}, newStore(t), okPool{})
+	if err := c.SendReply(context.Background(), pub, "hi"); err != nil {
+		t.Fatalf("send reply: %v", err)
+	}
+}
+
+func TestBuildFilterUsesAllowedAndCursor(t *testing.T) {
+	st := newStore(t)
+	defer st.Close()
+	now := time.Now()
+	_ = st.SaveCursor("alice", now.Add(-5*time.Second))
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := New(priv, pub, []string{"wss://relay"}, []string{"alice"}, st)
+	f := c.buildFilter()
+	if len(f.Authors) != 1 || f.Authors[0] != "alice" {
+		t.Fatalf("authors mismatch: %+v", f.Authors)
+	}
+	if f.Since == nil {
+		t.Fatalf("since missing")
+	}
+}
+
+func TestPublishProfileSuccess(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	c := NewWithPool(priv, pub, []string{"wss://relay"}, []string{pub}, newStore(t), okPool{})
+	if err := c.PublishProfile(context.Background(), "runner", "pic"); err != nil {
+		t.Fatalf("publish profile: %v", err)
 	}
 }

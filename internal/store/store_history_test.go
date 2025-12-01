@@ -100,3 +100,45 @@ func TestCursorSaveAndLoad(t *testing.T) {
 		t.Fatalf("cursor mismatch %v vs %v", got, now)
 	}
 }
+
+func TestActiveLifecycle(t *testing.T) {
+	st, cleanup := newTempStore(t)
+	defer cleanup()
+
+	if _, ok, err := st.Active("alice"); err != nil || ok {
+		t.Fatalf("expected no active session")
+	}
+	if err := st.SaveActive("alice", "sess1"); err != nil {
+		t.Fatalf("save active: %v", err)
+	}
+	if stt, ok, err := st.Active("alice"); err != nil || !ok || stt.SessionID != "sess1" {
+		t.Fatalf("unexpected active %+v ok=%v err=%v", stt, ok, err)
+	}
+	if err := st.ClearActive("alice"); err != nil {
+		t.Fatalf("clear active: %v", err)
+	}
+	if _, ok, _ := st.Active("alice"); ok {
+		t.Fatalf("expected cleared session")
+	}
+}
+
+func TestHistoryValidationAndProcessedErrors(t *testing.T) {
+	st, cleanup := newTempStore(t)
+	defer cleanup()
+
+	if err := st.AppendHistory("", json.RawMessage(`{}`), 0); err == nil {
+		t.Fatalf("expected thread id error")
+	}
+	if _, err := st.History("", 1); err == nil {
+		t.Fatalf("expected history validation error")
+	}
+	if _, err := st.AlreadyProcessed(""); err == nil {
+		t.Fatalf("expected error on empty id")
+	}
+	if err := st.MarkProcessed(""); err == nil {
+		t.Fatalf("expected error on empty id")
+	}
+	if seen, err := st.RecentMessageSeen("bob", "hi", 0); err != nil || seen {
+		t.Fatalf("recent message with default window should be false")
+	}
+}

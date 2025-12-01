@@ -37,7 +37,9 @@ func main() {
 		fmt.Printf("%s\n", buildVersion())
 		return
 	case "run":
-		run(args)
+		if err := runContext(context.Background(), args); err != nil {
+			fatalf(err.Error())
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", subcmd)
 		usage()
@@ -45,25 +47,25 @@ func main() {
 	}
 }
 
-func run(args []string) {
+func runContext(parent context.Context, args []string) error {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	configPath := fs.String("config", defaultConfigPath(), "Path to config.yaml")
 	healthListen := fs.String("health-listen", "", "Optional health endpoint listen addr (e.g., 127.0.0.1:8081)")
 	if err := fs.Parse(args); err != nil {
-		fatalf(err.Error())
+		return err
 	}
 	if fs.NArg() > 0 {
 		fmt.Fprintf(os.Stderr, "unexpected arguments: %v\n\n", fs.Args())
 		usage()
-		os.Exit(2)
+		return fmt.Errorf("unexpected arguments: %v", fs.Args())
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(parent, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	cfg, err := config.Load(*configPath)
 	if err != nil {
-		fatalf("load config: %v", err)
+		return fmt.Errorf("load config: %w", err)
 	}
 
 	buildVer = buildVersion()
@@ -77,7 +79,7 @@ func run(args []string) {
 
 	st, err := store.New(cfg.Storage.Path)
 	if err != nil {
-		fatalf("open store: %v", err)
+		return fmt.Errorf("open store: %w", err)
 	}
 	defer func() {
 		if err := st.Close(); err != nil {
@@ -87,20 +89,21 @@ func run(args []string) {
 
 	runner, err := app.Build(cfg, st, logger)
 	if err != nil {
-		fatalf("build runner: %v", err)
+		return fmt.Errorf("build runner: %w", err)
 	}
 
 	if *healthListen != "" {
 		if _, err := health.Start(ctx, *healthListen, buildVer, logger); err != nil {
-			fatalf("start health: %v", err)
+			return fmt.Errorf("start health: %w", err)
 		}
 	}
 
 	logger.Info("nostr-codex-runner starting")
 
 	if err := runner.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
-		fatalf("runtime error: %v", err)
+		return fmt.Errorf("runtime error: %w", err)
 	}
+	return nil
 }
 
 func setupLogger(cfg *config.Config) *slog.Logger {
