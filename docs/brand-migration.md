@@ -1,6 +1,6 @@
 # Brand Migration Plan – Issue 3oa.41
 
-Scope: update visible text/assets from "nostr-codex-runner" to "buddy" once repo/module rename is executed.
+Scope: ensure all visible text/assets use "buddy" (rename completed).
 
 Checklist
 - README: project name, badges (CI/release/coverage/staticcheck), quickstart commands (`buddy`, `buddy wizard`, `buddy run <preset>`), release links, install URLs.
@@ -11,8 +11,7 @@ Checklist
 - Scripts: `scripts/install.sh`, `scripts/run.sh` text.
 - Assets: social preview image if it contains text; any SVG/PNG badges.
 - Sample configs: paths/comments referencing old name.
-- References to `nostr-codex-runner` in code comments/logs (search and replace carefully after module rename).
-- FAQ/Backcompat: keep a section about legacy binary/env for one release.
+- Remove any remaining `nostr-codex-runner` mentions if found.
 
 Ordering
 1) After repo + module rename (issues 3oa.38/3oa.39).
