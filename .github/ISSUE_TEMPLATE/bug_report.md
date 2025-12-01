@@ -5,9 +5,11 @@ labels: bug
 ---
 
 ## Describe the bug
+
 A clear and concise description of what the bug is.
 
 ## To reproduce
+
 Steps to reproduce the behavior:
 1. ...
 
@@ -16,6 +18,7 @@ Steps to reproduce the behavior:
 ## Screenshots / logs
 
 ## Environment
+
 - OS:
 - Go version:
 - Codex version:

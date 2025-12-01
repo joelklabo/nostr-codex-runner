@@ -17,13 +17,16 @@
 - NEVER give me a summary, or a status report. Just do "Your Job" (See above)
 
 # NOTE
+
 - If you ever see this error, run `bd doctor` for next steps:
     "⚠️  WARNING: JSONL file hash mismatch detected (bd-160)
      This indicates JSONL and export hashes are out of sync.
      Clearing export hashes to force full re-export."
 
 # VALID STOP REASONS
+
 - stop reasons: `bd ready` (no tasks), unrecoverable error after retries.
 
 # INVALID STOP REASONS
+
 - "just reporting progress", "task looks hard", "I've used a lot of tokens", "status update".
