@@ -3,13 +3,10 @@
 Goal: make it easy to plug new transports/agents/actions/presets into the wizard without rewriting the flow.
 
 Proposed design
-- Registry structs exposed from wizard package:
-  - `type TransportOption struct { Name, Description string; Prompts []PromptSpec }`
-  - `type AgentOption struct { Name, Description string; Prompts []PromptSpec }`
-  - `type ActionOption struct { Name, Description string; Prompts []PromptSpec; DefaultEnabled bool }`
-  - `type PresetOption struct { Name, Description string; Apply func(*config.Config) }`
-- `PromptSpec` describes a question: kind (input/password/select/confirm), label, default, validation func.
-- Wizard flow builds options by iterating registries; core flow stays the same.
+- Registry structs exist in `internal/wizard/registry.go`:
+  - `TransportOption`, `AgentOption`, `ActionOption`, `PresetOption`, plus `PromptSpec`.
+- `GetRegistry` returns the current registry; `SetRegistry` overrides it (handy for plugins/tests).
+- Wizard flow iterates the registry; selecting a preset simply pulls embedded YAML today.
 
 Flow impact
 - Preset selection pre-fills config via `Apply` and skips irrelevant prompts.
@@ -21,11 +18,11 @@ Testing
 - Golden tests for generated configs when registry contents change.
 
 Steps to implement
-1) Define registry types and helpers in `internal/wizard/registry.go`.
-2) Refactor `wizard.Run` to consume registry options instead of hard-coded choices.
-3) Add built-in options for nostr/mock, http/copilot/echo, shell/readfile/writefile, presets (claude-dm, copilot-shell, local-llm, mock-echo).
-4) Update tests to inject minimal registries.
-5) Update docs to show how to add new options.
+1) (Done) Registry types + default entries live in `internal/wizard/registry.go`.
+2) (Done) `wizard.Run` consumes the registry.
+3) (Done) Built-ins: nostr/mock transports; http/copilot/echo agents; shell/readfile/writefile actions; presets: claude-dm, copilot-shell, local-llm, mock-echo.
+4) (Done) Tests can inject a custom registry via `SetRegistry`.
+5) (TODO) Add contributor snippet in README/CONTRIBUTING on how to add new options.
 
 Docs updates
 - Add section in `docs/wizard.md` describing registry hook for contributors.

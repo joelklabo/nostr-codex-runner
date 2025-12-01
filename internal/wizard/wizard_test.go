@@ -64,6 +64,37 @@ func TestRunFailsOnDepsMissingWhenUserSaysNo(t *testing.T) {
 	}
 }
 
+func TestSetRegistryOverridesOptions(t *testing.T) {
+	orig := GetRegistry()
+	defer SetRegistry(orig)
+
+	custom := Registry{
+		Presets: []PresetOption{{Name: "mock-echo", Description: "Only mock"}},
+		Transports: []TransportOption{
+			{Name: "mock", Description: "Offline mock transport"},
+		},
+		Agents: []AgentOption{
+			{Name: "echo", Description: "Echo agent"},
+		},
+		Actions: []ActionOption{
+			{Name: "readfile", Description: "Read files", DefaultEnable: true},
+		},
+	}
+	SetRegistry(custom)
+
+	td := t.TempDir()
+	path := filepath.Join(td, "config.yaml")
+	p := &StubPrompter{
+		Selects:   []string{"mock-echo"},
+		Inputs:    []string{}, // no nostr prompts
+		Passwords: []string{"abcd1234"},
+		Confirms:  []bool{true, false, true}, // overwrite? dry-run? continue deps?
+	}
+	if _, err := Run(context.Background(), path, p); err != nil {
+		t.Fatalf("run with custom registry: %v", err)
+	}
+}
+
 func containsAll(s string, needles []string) bool {
 	for _, n := range needles {
 		if !strings.Contains(s, n) {

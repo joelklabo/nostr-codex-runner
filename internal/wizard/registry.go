@@ -79,3 +79,9 @@ var defaultRegistry = Registry{
 func GetRegistry() Registry {
 	return defaultRegistry
 }
+
+// SetRegistry overrides the global registry (primarily for tests/extensibility).
+// Callers should restore the previous value after use to avoid leaking state across tests.
+func SetRegistry(r Registry) {
+	defaultRegistry = r
+}
