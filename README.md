@@ -21,11 +21,11 @@ The original Nostr Codex Runner is now just one config of this framework.
 - Minimal surface area: single binary, YAML config, and one background process.
 
 ## Command mini-DSL (DM payloads)
-- `/new [prompt]` — reset session; optional prompt starts a fresh Codex session.
-- `/use <session-id>` — switch to an existing Codex session.
+- `/new [prompt]` — reset session; optional prompt starts a fresh session.
+- `/use <session-id>` — switch to an existing session.
 - `/raw <cmd>` — execute a shell command on the host (working dir defaults to your home directory).
 - `/status` — show your active session and last update time.
-- `/help` — recap commands.
+- `/help` — recap commands and list available actions.
 - _Anything else_ — treated as a prompt and executed in your active session (or a new one if none).
 
 ## Quick start (Nostr + Codex example)
@@ -84,6 +84,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - `runner.allowed_pubkeys`: access control.
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
 - `agent.config.*`: CLI-style knobs for the selected agent (binary, working dir, extra args, timeout). `agent.codex` remains as a backward-compatible alias.
+- `actions[]`: host capabilities; if omitted, a default `shell` action is added so `/raw` works.
 - `storage.path`: BoltDB file for state.
 - `logging.level`: `debug|info|warn|error`; `logging.format`: `text|json`.
 
