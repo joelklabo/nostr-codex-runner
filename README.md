@@ -59,7 +59,7 @@ flowchart LR
 | --- | --- | --- |
 | `nostr` | DMs over relays | Default; allowlist enforced. |
 | `mock` | In-process harness | No network; great for tests. |
-| (planned) `email` | Mailgun webhook or IMAP | Inbound email → buddy; replies via SMTP/API. |
+| (planned) `email` | Mailgun webhook or IMAP | Inbound email → buddy; replies via SMTP/API. Mailgun needs a domain (paid after trial); IMAP can use your own mailbox. |
 
 ### Agents
 
