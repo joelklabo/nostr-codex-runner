@@ -72,6 +72,7 @@ buddy help                     show help
 - **Is shell safe?** Shell is powerful and risky—use `mock-echo` or `claude-dm` first, and keep `allowed_pubkeys` tight before enabling shell.
 - **Where do configs live?** By default `~/.config/buddy/config.yaml`; presets are built-in but can be overridden under `~/.config/buddy/presets/`.
 - **Is there a short alias?** We ship only `buddy` to avoid colliding with other tools; if you want `bud`, create your own shell alias or symlink.
+- **Windows?** Not yet. We ship macOS/Linux (amd64/arm64). Windows support is TBD; WSL works with the Linux binary.
 
 ## License
 MIT
