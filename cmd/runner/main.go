@@ -225,9 +225,6 @@ func defaultConfigPath() string {
 	if v := os.Getenv(envConfigNew); v != "" {
 		return v
 	}
-	if v := os.Getenv(envConfigNew); v != "" {
-		return v
-	}
 	// cwd config wins if present
 	if fileExists("config.yaml") {
 		return "config.yaml"
@@ -272,9 +269,6 @@ func configSearchOrder() []string {
 	paths := []string{}
 	if v := os.Getenv(envConfigNew); v != "" {
 		paths = append(paths, v+" (BUDDY_CONFIG)")
-	}
-	if v := os.Getenv(envConfigNew); v != "" {
-		paths = append(paths, v+" (NCR_CONFIG legacy)")
 	}
 	paths = append(paths, "config.yaml (cwd)")
 	if home, err := os.UserHomeDir(); err == nil {
