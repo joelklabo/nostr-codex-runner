@@ -1,4 +1,41 @@
-# Plugin Architecture Overview
+# Architecture Overview (buddy CLI) – includes diagram for issue 3oa.5
+
+```mermaid
+flowchart LR
+    subgraph CLI["buddy CLI"]
+      A1[b u d d y<br/>run / wizard / presets]
+      A2[Preset loader<br/>embedded + user overrides]
+    end
+    subgraph Config["Config & Presets"]
+      C1[config.yaml<br/>(argv / cwd / ~/.config/buddy)]
+      C2[Presets<br/>(embedded, ~/.config/buddy/presets, ./presets)]
+    end
+    subgraph Runner["Core runner"]
+      R1[Command DSL<br/>/new /use /shell /status]
+      R2[Session manager<br/>state in BoltDB]
+      R3[Action executor<br/>allowlist + timeouts]
+    end
+    subgraph Plumbing["Plugins"]
+      T[Transport(s)<br/>nostr/mock/slack/whatsapp]
+      G[Agent<br/>codexcli/copilotcli/http/echo]
+      X[Actions<br/>shell/readfile/writefile]
+    end
+    subgraph Observability["Observability"]
+      M[Metrics /health / Prom]
+      L[Structured logs]
+    end
+    A1 --> A2 --> C2
+    A1 --> C1
+    C1 --> R1
+    C2 --> R1
+    R1 --> R2 --> G
+    G --> R3
+    R3 --> X
+    R1 --> T
+    R2 --> T
+    R2 --> M
+    R2 --> L
+```
 
 The runner is composed of three swappable parts:
 
