@@ -1,4 +1,4 @@
-# buddy — friendly transport → agent → actions runner
+# `buddy` — Pick a transport, pick an agent, pick an action.
 
 ![buddy logo](assets/buddy-hero-wide.png)
 
