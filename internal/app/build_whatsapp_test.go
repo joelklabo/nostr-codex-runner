@@ -45,7 +45,7 @@ func TestBuildWithWhatsAppAndCopilot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("store: %v", err)
 	}
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 
 	r, err := Build(cfg, st, slog.Default())
 	if err != nil {
@@ -77,7 +77,7 @@ func TestBuildWhatsAppConfigError(t *testing.T) {
 		Projects: []config.Project{{ID: "p", Name: "p", Path: "."}},
 	}
 	st, _ := store.New(cfg.Storage.Path)
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 
 	if _, err := Build(cfg, st, slog.Default()); err == nil {
 		t.Fatalf("expected decode error")

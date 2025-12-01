@@ -21,7 +21,7 @@ func TestNewMissingKey(t *testing.T) {
 func TestNewAndID(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	st, _ := store.New(t.TempDir() + "/state.db")
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	tr, err := New(Config{PrivateKey: priv}, st)
 	if err != nil {
 		t.Fatalf("new: %v", err)
@@ -49,7 +49,7 @@ func (s *stubClient) SendReply(ctx context.Context, toPubKey string, message str
 func TestSendMissingRecipient(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	st, _ := store.New(t.TempDir() + "/state.db")
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	tr, _ := New(Config{PrivateKey: priv}, st)
 	tr.client = &stubClient{}
 
@@ -61,7 +61,7 @@ func TestSendMissingRecipient(t *testing.T) {
 func TestSendPropagatesClientError(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	st, _ := store.New(t.TempDir() + "/state.db")
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	tr, _ := New(Config{PrivateKey: priv}, st)
 	sc := &stubClient{sendErr: errors.New("boom")}
 	tr.client = sc
@@ -74,7 +74,7 @@ func TestSendPropagatesClientError(t *testing.T) {
 func TestStartReturnsClientError(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	st, _ := store.New(t.TempDir() + "/state.db")
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	tr, _ := New(Config{PrivateKey: priv}, st)
 	sc := &stubClient{listenErr: errors.New("listen fail")}
 	tr.client = sc

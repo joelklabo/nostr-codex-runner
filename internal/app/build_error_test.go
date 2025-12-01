@@ -21,7 +21,7 @@ func TestBuildFailsOnUnknownAgent(t *testing.T) {
 		Projects:   []config.Project{{ID: "p", Name: "p", Path: "."}},
 	}
 	st, _ := store.New(cfg.Storage.Path)
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	if _, err := Build(cfg, st, slog.Default()); err == nil {
 		t.Fatalf("expected error for unknown agent")
 	}
@@ -39,7 +39,7 @@ func TestBuildFailsOnUnknownAction(t *testing.T) {
 		Projects:   []config.Project{{ID: "p", Name: "p", Path: "."}},
 	}
 	st, _ := store.New(cfg.Storage.Path)
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	if _, err := Build(cfg, st, slog.Default()); err == nil {
 		t.Fatalf("expected error for unknown action")
 	}

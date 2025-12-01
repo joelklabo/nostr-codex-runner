@@ -25,8 +25,10 @@ func TestParseSubcommand(t *testing.T) {
 }
 
 func TestDefaultConfigPathEnv(t *testing.T) {
-	os.Setenv(envConfig, "/tmp/cfg")
-	defer os.Unsetenv(envConfig)
+	if err := os.Setenv(envConfig, "/tmp/cfg"); err != nil {
+		t.Fatalf("set env: %v", err)
+	}
+	defer func() { _ = os.Unsetenv(envConfig) }()
 	if got := defaultConfigPath(); got != "/tmp/cfg" {
 		t.Fatalf("expected env path, got %s", got)
 	}
@@ -37,7 +39,7 @@ func TestUsageDoesNotPanic(t *testing.T) {
 }
 
 func TestDefaultConfigPathFallback(t *testing.T) {
-	os.Unsetenv(envConfig)
+	_ = os.Unsetenv(envConfig)
 	if got := defaultConfigPath(); got != "config.yaml" {
 		t.Fatalf("unexpected default path %s", got)
 	}

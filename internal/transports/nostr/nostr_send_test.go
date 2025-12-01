@@ -30,7 +30,7 @@ func TestSendErrorPropagation(t *testing.T) {
 	priv := nostr.GeneratePrivateKey()
 	pub, _ := nostr.GetPublicKey(priv)
 	st, _ := store.New(t.TempDir() + "/state.db")
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	client := nostrclient.NewWithPool(priv, pub, nil, nil, st, &poolFail{})
 	tr := &Transport{cfg: Config{PrivateKey: priv}, store: st, client: client, id: "nostr"}
 	err := tr.Send(context.Background(), core.OutboundMessage{Recipient: "bob", Text: "hi"})

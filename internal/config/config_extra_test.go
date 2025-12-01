@@ -41,8 +41,10 @@ func TestApplyDefaultsFillsTransportAgentAndProjects(t *testing.T) {
 }
 
 func TestExpandPathEnvAndHome(t *testing.T) {
-	os.Setenv("NCR_TMP", "/tmp/ncrpath")
-	defer os.Unsetenv("NCR_TMP")
+	if err := os.Setenv("NCR_TMP", "/tmp/ncrpath"); err != nil {
+		t.Fatalf("set env: %v", err)
+	}
+	defer func() { _ = os.Unsetenv("NCR_TMP") }()
 	got := expandPath("$NCR_TMP/sub")
 	if got != filepath.Clean("/tmp/ncrpath/sub") {
 		t.Fatalf("expand env failed: %s", got)

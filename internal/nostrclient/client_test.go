@@ -59,7 +59,7 @@ func TestAllowedList(t *testing.T) {
 
 func TestLastCursorMax(t *testing.T) {
 	st := newStore(t)
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	now := time.Now().UTC()
 	_ = st.SaveCursor("a", now.Add(-10*time.Second))
 	_ = st.SaveCursor("b", now.Add(-5*time.Second))
@@ -180,7 +180,9 @@ func TestListenProcessesInbound(t *testing.T) {
 	secret, _ := nip04.ComputeSharedSecret(pub, priv)
 	enc, _ := nip04.Encrypt("hello", secret)
 	ev.Content = enc
-	ev.Sign(priv)
+	if err := ev.Sign(priv); err != nil {
+		t.Fatalf("sign: %v", err)
+	}
 	pool.ch <- nostr.RelayEvent{Event: ev}
 
 	select {
@@ -233,7 +235,7 @@ func TestSendReplySuccess(t *testing.T) {
 
 func TestBuildFilterUsesAllowedAndCursor(t *testing.T) {
 	st := newStore(t)
-	defer st.Close()
+	defer func() { _ = st.Close() }()
 	now := time.Now()
 	_ = st.SaveCursor("alice", now.Add(-5*time.Second))
 	priv := nostr.GeneratePrivateKey()
