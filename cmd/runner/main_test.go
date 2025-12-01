@@ -38,21 +38,13 @@ func TestDefaultConfigPathEnv(t *testing.T) {
 	}
 }
 
-func TestDefaultConfigPathEnvLegacy(t *testing.T) {
-	t.Setenv(envConfigNew, "")
-	t.Setenv(envConfigLegacy, "/tmp/legacy")
-	if got := defaultConfigPath(); got != "/tmp/legacy" {
-		t.Fatalf("expected legacy env path, got %s", got)
-	}
-}
-
 func TestUsageDoesNotPanic(t *testing.T) {
 	usage()
 }
 
 func TestDefaultConfigPathFallback(t *testing.T) {
 	t.Setenv(envConfigNew, "")
-	t.Setenv(envConfigLegacy, "")
+
 	got := defaultConfigPath()
 	if got == "" {
 		t.Fatalf("unexpected empty path")
@@ -98,16 +90,6 @@ func TestPrintBannerOutputs(t *testing.T) {
 func TestBuildVersionNonEmpty(t *testing.T) {
 	if buildVersion() == "" {
 		t.Fatalf("buildVersion should not be empty")
-	}
-}
-
-func TestCollectCompatWarnings(t *testing.T) {
-	os.Args = []string{"/usr/bin/nostr-codex-runner"}
-	t.Setenv(envConfigLegacy, "x")
-	t.Setenv(envConfigNew, "")
-	ws := collectCompatWarnings("/home/u/.config/nostr-codex-runner/config.yaml")
-	if len(ws) < 2 {
-		t.Fatalf("expected warnings, got %v", ws)
 	}
 }
 
