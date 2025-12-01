@@ -15,7 +15,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install markdownlint-cli2
-        run: npm install -g markdownlint-cli2@0.8.1
       - name: Run markdownlint
-        run: markdownlint-cli2 "README.md" "docs/landing.md" "docs/readme-details.md" "docs/issues/*.md"
+        run: make lint-md

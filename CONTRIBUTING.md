@@ -15,7 +15,7 @@ Thanks for helping improve the project! This repo uses `bd` for issue tracking a
 - Lint: `go vet ./...`
 - Tests: `go test ./...`
 - Run: `make run` (expects `config.yaml`) or `buddy run <preset|config>` with embedded presets.
-- Docs: `markdownlint-cli2 "**/*.md" "#node_modules"` (install with `npm i -g markdownlint-cli2`) to match CI.
+- Docs: `make lint-md` (uses `npx markdownlint-cli2@0.8.1` on README + landing docs to match CI). Requires Node 20+.
 
 ## Commit and PR guidelines
 - Reference the `bd` issue in the commit subject, e.g. `Quick install outline (closes buddy-3oa.2)`.

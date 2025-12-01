@@ -1,4 +1,4 @@
-.PHONY: run build lint lint-ci test fmt install verify
+.PHONY: run build lint lint-ci lint-md test fmt install verify
 
 CONFIG ?= config.yaml
 BIN ?= bin/buddy
@@ -18,6 +18,9 @@ lint:
 lint-ci:
 	@command -v golangci-lint >/dev/null 2>&1 || (echo "golangci-lint not installed; install with 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest'"; exit 1)
 	golangci-lint run --modules-download-mode=mod --timeout=5m ./...
+
+lint-md:
+	npx -y markdownlint-cli2@0.8.1 README.md docs/landing.md docs/readme-details.md docs/issues/*.md
 
 test:
 	go test ./...
