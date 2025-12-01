@@ -14,7 +14,7 @@
   <rect width="1280" height="640" fill="url(#bg)" opacity="0.35"/>
   <rect width="1280" height="640" fill="url(#glow)"/>
   <text x="80" y="210" fill="#cfe9ff" font-family="'Space Grotesk', 'Inter', system-ui" font-size="44" letter-spacing="4" opacity="0.7">NOSTR → CODEX</text>
-  <text x="80" y="300" fill="#f8fbff" font-family="'Space Grotesk', 'Inter', system-ui" font-size="82" font-weight="700">nostr-codex-runner</text>
+  <text x="80" y="300" fill="#f8fbff" font-family="'Space Grotesk', 'Inter', system-ui" font-size="82" font-weight="700">buddy</text>
   <text x="80" y="380" fill="#dbe6ff" font-family="'Space Grotesk', 'Inter', system-ui" font-size="30" opacity="0.9">Encrypted DMs in. Codex replies out. Always-on, session-aware.</text>
   <text x="80" y="430" fill="#9fb8ff" font-family="'Space Grotesk', 'Inter', system-ui" font-size="26" opacity="0.9">/raw shell · Cloudflare tunnel helper · bd workflow</text>
   <rect x="80" y="470" rx="10" ry="10" width="340" height="64" fill="rgba(12,18,36,0.5)" stroke="#7c7eff" stroke-width="2"/>
