@@ -222,7 +222,7 @@ func (c *Config) applyDefaults(baseDir string) {
 	}
 	if c.Storage.Path == "" {
 		if home, err := os.UserHomeDir(); err == nil {
-			c.Storage.Path = filepath.Join(home, ".nostr-codex", "state.db")
+			c.Storage.Path = filepath.Join(home, ".buddy", "state.db")
 		}
 	}
 	if c.Logging.File != "" {

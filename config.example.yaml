@@ -32,7 +32,7 @@ storage:
 
 logging:
   level: "info"
-  file: "~/.nostr-codex/runner.log"  # optional file log in addition to stdout
+  file: "~/.buddy/runner.log"  # optional file log in addition to stdout
 
 # Projects for bd workspaces (path should contain .beads)
 projects:

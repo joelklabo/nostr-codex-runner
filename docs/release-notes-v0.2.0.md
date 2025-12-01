@@ -8,7 +8,7 @@ Highlights
 - Main rewired through `internal/app.Build`, cleaning direct Nostr/Codex coupling.
 
 Samples & docs
-- Sample configs: `configs/nostr-codex-shell.yaml`, `configs/mock-echo.yaml`.
+- Sample configs (now renamed): `configs/copilot-shell.yaml`, `configs/mock-echo.yaml`.
 - Architecture doc: `docs/architecture.md`.
 - Migration guide: `docs/migration-v0.2.0.md`.
 

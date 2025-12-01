@@ -40,7 +40,6 @@ Goal: ship a binary-first "buddy" CLI with a fast install, guided wizard, preset
 29. P1 Install script (curl | sh; checksum; /usr/local/bin or ~/.local/bin).
 30. P1 CLI UX copy/errors (friendly, masked secrets, exit codes).
 31. P1 Config search precedence (arg path > cwd config.yaml > ~/.config/buddy/config.yaml; env opt-in).
-32. P1 Backward-compat shim (old env/script invocation; deprecation note).
 33. P1 Release QA matrix (macOS/Linux/arm64; presets + wizard).
 34. P2 Offline bundle (embed default presets/assets; graceful no-network).
 35. P2 Help/man page generation.
@@ -53,7 +52,6 @@ Goal: ship a binary-first "buddy" CLI with a fast install, guided wizard, preset
 40. P1 Package manager updates (Homebrew formula rename, release artifacts).
 41. P1 Brand migration in docs (README, docs index, wizard copy, badges). ✅ mostly done
 42. P1 CLI help/man text with new name. ✅
-43. P1 Backward-compat note (old command mapping). **dropped**
 44. P2 Domain/SEO check (distinct from Buddy.Works; optional microsite).
 
 ## Notes
