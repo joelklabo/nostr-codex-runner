@@ -1,5 +1,5 @@
 # Simple Dockerfile for nostr-codex-runner
-FROM golang:1.24 as builder
+FROM golang:1.24.10 AS builder
 WORKDIR /src
 COPY . .
 RUN go build -o /out/nostr-codex-runner ./cmd/runner
