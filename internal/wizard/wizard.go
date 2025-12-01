@@ -164,6 +164,14 @@ func Run(ctx context.Context, path string, p Prompter) (string, error) {
 		return "", err
 	}
 
+	fmt.Printf("Config written to %s\n", cfgPath)
+	if presetChoice != "" {
+		fmt.Printf("Next: buddy run %s\n", presetChoice)
+		fmt.Printf("Check deps: buddy check %s\n", presetChoice)
+	} else {
+		fmt.Printf("Next: buddy run -config %s\n", cfgPath)
+	}
+
 	return cfgPath, nil
 }
 

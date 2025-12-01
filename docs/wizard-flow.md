@@ -10,6 +10,7 @@ This is the draft script/IA for `buddy wizard [config-path]`.
 2) **Choose a preset or blank**
    - Options: `claude-dm`, `copilot-shell`, `local-llm`, `mock-echo`, `blank`.
    - Selecting a preset pre-fills later answers; user can still edit inputs.
+   - Show a quick summary (description, transports, agent, actions) after selection.
 
 3) **Transport**
    - Default: `nostr`.
@@ -31,15 +32,10 @@ This is the draft script/IA for `buddy wizard [config-path]`.
    - Session timeout (default 60m), initial prompt (optional), log level (info|debug), storage path (BoltDB default `~/.local/share/buddy/state.db`).
 
 7) **Summary + path**
-   - Show derived preset name if any, transport/agent/actions summary, and config path.
-   - Ask "Write this config now?" (yes/no). If no, abort without writing.
-
+   - Show preset name (or blank), transport/agent/actions summary, and config path.
+   - Dependency preflight runs and will warn/fail on missing required deps; user can choose to continue on warnings.
 8) **Write config**
-   - Create parent dirs; write YAML.
-
-9) **Next steps prompt**
-   - Offer to run now: `buddy run <preset>` or `buddy run <config-path>`.
-   - If yes, start runner and stream logs until Ctrl+C.
+   - Create parent dirs; write YAML, print next commands (`buddy run <preset>` or `buddy run -config <path>`, plus `buddy check <preset>`).
 
 ## Copy snippets (examples)
 - Welcome: "We'll ask a few questions and write a YAML config. Secrets stay local and are masked as you type."
