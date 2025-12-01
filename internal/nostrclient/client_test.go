@@ -2,13 +2,14 @@ package nostrclient
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
 	"nostr-codex-runner/internal/store"
 
 	"github.com/nbd-wtf/go-nostr"
-	"sync"
+	"github.com/nbd-wtf/go-nostr/nip04"
 )
 
 func newStore(t *testing.T) *store.Store {
@@ -89,5 +90,75 @@ func TestListenNilPool(t *testing.T) {
 	c := &Client{pool: nil}
 	if err := c.Listen(context.Background(), func(context.Context, IncomingMessage) {}); err == nil {
 		t.Fatalf("expected error on nil pool")
+	}
+}
+
+// stub implementations for Listen testing
+type stubStore struct {
+	processed map[string]bool
+}
+
+func (s *stubStore) SaveActive(pubkey, sessionID string) error { return nil }
+func (s *stubStore) ClearActive(pubkey string) error           { return nil }
+func (s *stubStore) Active(pubkey string) (store.SessionState, bool, error) {
+	return store.SessionState{}, false, nil
+}
+func (s *stubStore) LastCursor(pubkey string) (time.Time, error)  { return time.Time{}, nil }
+func (s *stubStore) SaveCursor(pubkey string, ts time.Time) error { return nil }
+func (s *stubStore) AlreadyProcessed(eventID string) (bool, error) {
+	if s.processed == nil {
+		s.processed = map[string]bool{}
+	}
+	seen := s.processed[eventID]
+	s.processed[eventID] = true
+	return seen, nil
+}
+func (s *stubStore) MarkProcessed(eventID string) error { return nil }
+func (s *stubStore) RecentMessageSeen(pubkey, message string, window time.Duration) (bool, error) {
+	return false, nil
+}
+
+type stubPool struct {
+	ch chan nostr.RelayEvent
+}
+
+func newStubPool() *stubPool { return &stubPool{ch: make(chan nostr.RelayEvent, 1)} }
+
+func (p *stubPool) SubscribeMany(ctx context.Context, relays []string, filter nostr.Filter, _ ...nostr.SubscriptionOption) chan nostr.RelayEvent {
+	return p.ch
+}
+func (p *stubPool) PublishMany(ctx context.Context, relays []string, ev nostr.Event) chan nostr.PublishResult {
+	out := make(chan nostr.PublishResult, 1)
+	close(out)
+	return out
+}
+
+func TestListenProcessesInbound(t *testing.T) {
+	priv := nostr.GeneratePrivateKey()
+	pub, _ := nostr.GetPublicKey(priv)
+	pool := newStubPool()
+	st := &stubStore{}
+	c := NewWithPool(priv, pub, []string{"wss://relay"}, []string{pub}, st, pool)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	got := make(chan IncomingMessage, 1)
+	go func() { _ = c.Listen(ctx, func(_ context.Context, m IncomingMessage) { got <- m; cancel() }) }()
+
+	ev := &nostr.Event{ID: "e1", PubKey: pub, CreatedAt: nostr.Now(), Kind: nostr.KindEncryptedDirectMessage, Tags: nostr.Tags{nostr.Tag{"p", pub}}}
+	secret, _ := nip04.ComputeSharedSecret(pub, priv)
+	enc, _ := nip04.Encrypt("hello", secret)
+	ev.Content = enc
+	ev.Sign(priv)
+	pool.ch <- nostr.RelayEvent{Event: ev}
+
+	select {
+	case msg := <-got:
+		if msg.Plaintext != "hello" {
+			t.Fatalf("plaintext mismatch: %s", msg.Plaintext)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatalf("timeout")
 	}
 }

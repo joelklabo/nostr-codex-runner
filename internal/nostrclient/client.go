@@ -24,11 +24,11 @@ type IncomingMessage struct {
 
 // Client wraps Nostr connectivity and send/receive helpers.
 type Client struct {
-	pool    *nostr.SimplePool
+	pool    Pool
 	privKey string
 	pubKey  string
 	relays  []string
-	store   *store.Store
+	store   store.StoreAPI
 	allowed map[string]struct{}
 
 	secretMu sync.Mutex
@@ -51,13 +51,18 @@ type lastSeen struct {
 }
 
 // New constructs a client pointing at the provided relays.
-func New(privKey string, pubKey string, relays []string, allowedPubkeys []string, st *store.Store) *Client {
+func New(privKey string, pubKey string, relays []string, allowedPubkeys []string, st store.StoreAPI) *Client {
+	return NewWithPool(privKey, pubKey, relays, allowedPubkeys, st, nostr.NewSimplePool(context.Background()))
+}
+
+// NewWithPool allows injecting a custom pool (for tests).
+func NewWithPool(privKey string, pubKey string, relays []string, allowedPubkeys []string, st store.StoreAPI, pool Pool) *Client {
 	allowed := make(map[string]struct{}, len(allowedPubkeys))
 	for _, pk := range allowedPubkeys {
 		allowed[strings.ToLower(pk)] = struct{}{}
 	}
 	return &Client{
-		pool:        nostr.NewSimplePool(context.Background()),
+		pool:        pool,
 		privKey:     privKey,
 		pubKey:      strings.ToLower(pubKey),
 		relays:      relays,
