@@ -15,7 +15,7 @@ func TestRunWritesConfig(t *testing.T) {
 		Selects:   []string{"mock-echo"},
 		Inputs:    []string{}, // no nostr prompts for mock preset
 		Passwords: []string{"abcd1234"},
-		Confirms:  []bool{true, false}, // overwrite? dry-run?
+		Confirms:  []bool{true, false, true}, // overwrite? dry-run? continue missing deps?
 	}
 	got, err := Run(context.Background(), path, p)
 	if err != nil {
@@ -46,6 +46,21 @@ func TestRunRequiresAllowedPubkey(t *testing.T) {
 	_, err := Run(context.Background(), path, p)
 	if err == nil {
 		t.Fatalf("expected error for missing allowed pubkeys")
+	}
+}
+
+func TestRunFailsOnDepsMissingWhenUserSaysNo(t *testing.T) {
+	td := t.TempDir()
+	path := filepath.Join(td, "config.yaml")
+	p := &StubPrompter{
+		Selects:   []string{"copilot-shell"},
+		Inputs:    []string{"wss://relay.example", "npub1"}, // relays, allowed
+		Passwords: []string{"abcd1234"},                     // nostr priv
+		Confirms:  []bool{true, false, false},               // overwrite? dry-run? continue deps?
+	}
+	_, err := Run(context.Background(), path, p)
+	if err == nil {
+		t.Fatalf("expected failure when declining missing deps")
 	}
 }
 
