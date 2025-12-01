@@ -26,9 +26,11 @@ brew install joelklabo/tap/buddy
 # or script (downloads release, verifies checksum)
 curl -fsSL https://get.buddy.sh | sh
 ```
+
 Homebrew tap `joelklabo/tap` is published by this repo’s releases—no extra setup needed.
 
 ## Quick start (wizard-first)
+
 1) Run `buddy wizard` → choose preset, enter relays/keys; writes `~/.config/buddy/config.yaml`.
 2) Start: `buddy run <preset|config>`
    - Built-ins: `claude-dm`, `copilot-shell`, `local-llm`, `mock-echo` (offline/test; no DMs).
@@ -51,6 +53,7 @@ flowchart LR
 - Safety: allowed pubkeys, dep checks, health/metrics endpoints.
 
 ## Docs (essentials)
+
 - Quick install: `docs/quick-install-ia.md`
 - Use cases: `docs/use-cases.md`
 - Config reference: `docs/config.md`
@@ -60,8 +63,10 @@ flowchart LR
 - More detail (CLI surface, config search, FAQ): `docs/readme-details.md`
 
 ## Contributing
+
 - See `CONTRIBUTING.md` and `docs/style-guide.md`.
 - Go 1.24+, `go test ./...` before pushing; one issue per commit.
 
 ## License
+
 MIT

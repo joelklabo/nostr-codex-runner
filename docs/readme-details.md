@@ -1,7 +1,8 @@
 # README Details
 
 ## CLI surface
-```
+
+```text
 buddy run <preset|config>      start the runner
 buddy wizard [config-path]     guided setup; supports --dry-run
 buddy presets [name]           list built-ins or show details
@@ -12,11 +13,13 @@ buddy init-config [path]       copy example config if missing
 ```
 
 ## Config search order
+
 1) Positional/flag: `buddy run <preset|path>` (flag `-config` still works; env `BUDDY_CONFIG` preferred)
 2) `./config.yaml`
 3) `~/.config/buddy/config.yaml`
 
 ## Docs index
+
 - Docs landing: `docs/index-ia.md`
 - Quick install: `docs/quick-install-ia.md`
 - Use cases: `docs/use-cases.md`
@@ -28,6 +31,7 @@ buddy init-config [path]       copy example config if missing
 - Release QA: `docs/release-qa.md`
 
 ## FAQ (short)
+
 - **Do I need Go to use it?** No. Install a release (brew or script) and run presets; building is optional.
 - **Is shell safe?** Shell is powerful—start with `mock-echo` or `claude-dm`; keep `allowed_pubkeys` tight before enabling shell.
 - **Where do configs live?** By default `~/.config/buddy/config.yaml`; presets can be overridden under `~/.config/buddy/presets/`.

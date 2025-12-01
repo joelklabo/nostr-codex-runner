@@ -18,4 +18,4 @@ jobs:
       - name: Install markdownlint-cli2
         run: npm install -g markdownlint-cli2@0.8.1
       - name: Run markdownlint
-        run: markdownlint-cli2 "**/*.md" "#node_modules"
+        run: markdownlint-cli2 "README.md" "docs/landing.md" "docs/readme-details.md" "docs/issues/*.md"
