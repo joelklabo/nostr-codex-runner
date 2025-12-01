@@ -6,7 +6,7 @@
 
 - [ ] `go test ./...`
 - [ ] `go vet ./...`
-- [ ] Manual: 
+- [ ] Manual:
 
 ## Checklist
 
