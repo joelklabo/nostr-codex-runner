@@ -14,6 +14,7 @@ import (
 	"syscall"
 
 	"github.com/joelklabo/buddy/internal/app"
+	"github.com/joelklabo/buddy/internal/assets"
 	"github.com/joelklabo/buddy/internal/config"
 	"github.com/joelklabo/buddy/internal/health"
 	"github.com/joelklabo/buddy/internal/metrics"
@@ -47,6 +48,11 @@ func main() {
 		return
 	case "wizard":
 		if err := runWizard(args); err != nil {
+			fatalf(err.Error())
+		}
+		return
+	case "init-config":
+		if err := runInitConfig(args); err != nil {
 			fatalf(err.Error())
 		}
 		return
@@ -232,6 +238,7 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "Commands:\n")
 	fmt.Fprintf(os.Stderr, "  run <preset|config>       start the runner\n")
 	fmt.Fprintf(os.Stderr, "  wizard [config-path]      guided setup; supports dry-run\n")
+	fmt.Fprintf(os.Stderr, "  init-config [path]        write example config (default ./config.yaml)\n")
 	fmt.Fprintf(os.Stderr, "  presets [name]            list built-in presets or show one\n")
 	fmt.Fprintf(os.Stderr, "  version                   show version\n")
 	fmt.Fprintf(os.Stderr, "  help [command]            show help\n\n")
@@ -343,6 +350,8 @@ func printHelp(args []string) {
 	case "wizard":
 		fmt.Println("buddy wizard [config-path] - guided setup; writes config or dry-runs")
 		fmt.Println("Prompts for relays/keys/allowed pubkeys, agent choice, actions.")
+	case "init-config":
+		fmt.Println("buddy init-config [path] - write config.example.yaml to path (default ./config.yaml) if missing")
 	case "presets":
 		fmt.Println("buddy presets [name] - list built-in presets or show one.")
 		fmt.Println("Examples:")
@@ -380,5 +389,24 @@ func runPresets(args []string) error {
 	fmt.Printf("Description: %s\n", descMap[name])
 	fmt.Printf("Run it:\n  buddy run %s\n\n", name)
 	fmt.Println("View YAML: buddy presets", name, "--yaml")
+	return nil
+}
+
+func runInitConfig(args []string) error {
+	path := "config.yaml"
+	if len(args) > 0 {
+		path = args[0]
+	}
+	if fileExists(path) {
+		return fmt.Errorf("%s already exists", path)
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("make dir: %w", err)
+	}
+	if err := os.WriteFile(path, assets.ConfigExample, 0o600); err != nil {
+		return fmt.Errorf("write config: %w", err)
+	}
+	fmt.Printf("Wrote example config to %s\n", path)
 	return nil
 }
