@@ -21,7 +21,7 @@ Smoke checklist (per platform)
 7) `buddy help` shows commands
 8) `buddy check mock-echo -json` prints JSON with status fields
 9) `buddy presets claude-dm --yaml` respects overrides if `~/.config/buddy/presets/claude-dm.yaml` exists
-10) Homebrew tap check (once tap is published): `brew tap joelklabo/tap && brew info buddy && brew install joelklabo/tap/buddy && buddy --version` (CI job `homebrew-check.yml` currently skips if tap repo missing).
+10) Homebrew tap check: `brew tap joelklabo/tap && brew info buddy && brew install joelklabo/tap/buddy && buddy --version` (CI job `homebrew-check.yml`).
 
 Brew checklist (macOS)
 - `brew install joelklabo/tap/buddy`

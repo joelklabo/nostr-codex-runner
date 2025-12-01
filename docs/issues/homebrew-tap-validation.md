@@ -17,4 +17,4 @@ Acceptance
 
 - Workflow added and passing on main; documented in `docs/release-qa.md`.
 - README line remains accurate and linked to the CI job badge/log.
-- Blocker: `joelklabo/homebrew-tap` repo is missing; create/publish tap so validation can succeed (workflow currently skips if absent).
+- Tap published at `joelklabo/homebrew-tap`; CI installs from it.

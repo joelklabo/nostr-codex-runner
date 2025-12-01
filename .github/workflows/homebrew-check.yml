@@ -9,7 +9,6 @@ on:
 
 jobs:
   brew-check:
-    continue-on-error: true
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,12 +18,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh api repos/joelklabo/homebrew-tap >/dev/null 2>&1; then
-            git clone https://x-access-token:${GH_TOKEN}@github.com/joelklabo/homebrew-tap /tmp/homebrew-tap
-          else
-            echo "homebrew tap repo missing; skipping tap clone"
-            exit 0
-          fi
+          git clone https://x-access-token:${GH_TOKEN}@github.com/joelklabo/homebrew-tap /tmp/homebrew-tap
           brew tap joelklabo/tap /tmp/homebrew-tap
       - name: Brew info buddy
         env:

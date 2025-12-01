@@ -20,11 +20,11 @@ Binary-first, wizard-assisted CLI that turns messages (Nostr by default, mock of
 ## Quick install
 
 ```bash
-# Script (downloads release, verifies checksum)
-curl -fsSL https://get.buddy.sh | sh
+# Homebrew (macOS/Linux)
+brew install joelklabo/tap/buddy
 
-# Homebrew (macOS/Linux) — tap publish in progress
-# brew install joelklabo/tap/buddy
+# or script (downloads release, verifies checksum)
+curl -fsSL https://get.buddy.sh | sh
 ```
 
 ## Quick start (wizard-first)
