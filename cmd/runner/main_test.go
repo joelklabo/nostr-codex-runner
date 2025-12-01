@@ -97,6 +97,16 @@ func TestBuildVersionNonEmpty(t *testing.T) {
 	}
 }
 
+func TestCollectCompatWarnings(t *testing.T) {
+	os.Args = []string{"/usr/bin/nostr-codex-runner"}
+	t.Setenv(envConfigLegacy, "x")
+	t.Setenv(envConfigNew, "")
+	ws := collectCompatWarnings("/home/u/.config/nostr-codex-runner/config.yaml")
+	if len(ws) < 2 {
+		t.Fatalf("expected warnings, got %v", ws)
+	}
+}
+
 func TestRunContextStartsAndCancels(t *testing.T) {
 	td := t.TempDir()
 	cfgPath := filepath.Join(td, "config.yaml")

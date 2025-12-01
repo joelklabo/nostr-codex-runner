@@ -82,6 +82,10 @@ func runContext(parent context.Context, args []string) error {
 		return friendlyConfigErr(*configPath, err)
 	}
 
+	for _, w := range collectCompatWarnings(*configPath) {
+		fmt.Fprintf(os.Stderr, "[warn] %s\n", w)
+	}
+
 	buildVer = buildVersion()
 	if h, err := os.Hostname(); err == nil {
 		hostName = h
@@ -261,4 +265,19 @@ func runWizard(args []string) error {
 	fmt.Printf("Config written to %s\n", cfgPath)
 	fmt.Printf("Next: run `nostr-codex-runner run -config %s`\n", cfgPath)
 	return nil
+}
+
+func collectCompatWarnings(configPath string) []string {
+	var warnings []string
+	if os.Getenv(envConfigLegacy) != "" {
+		warnings = append(warnings, fmt.Sprintf("%s is deprecated; use %s instead", envConfigLegacy, envConfigNew))
+	}
+	if strings.Contains(configPath, ".config/nostr-codex-runner") {
+		warnings = append(warnings, "config path uses legacy directory (.config/nostr-codex-runner); prefer ~/.config/buddy/config.yaml")
+	}
+	bin := filepath.Base(os.Args[0])
+	if strings.Contains(bin, "nostr-codex-runner") {
+		warnings = append(warnings, "binary name nostr-codex-runner is deprecated; future releases will use buddy/nostr-buddy")
+	}
+	return warnings
 }
