@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -122,6 +123,71 @@ func (PortChecker) Check(dep DepInput) Result {
 	}
 	conn.Close()
 	return res
+}
+
+// RelayChecker tries to reach a relay host:port (wss/ws/http style).
+type RelayChecker struct{}
+
+func (RelayChecker) Check(dep DepInput) Result {
+	target, err := relayTarget(dep.Name)
+	res := Result{Name: dep.Name, Type: dep.Type, Status: "OK"}
+	if err != nil {
+		res.Status = missingStatus(dep.Optional)
+		res.Details = fmt.Sprintf("invalid relay: %v", err)
+		return res
+	}
+	conn, err := net.DialTimeout("tcp", target, 2*time.Second)
+	if err != nil {
+		res.Status = missingStatus(dep.Optional)
+		res.Details = fmt.Sprintf("unreachable (%s)", dep.Hint)
+		return res
+	}
+	conn.Close()
+	return res
+}
+
+// DirWriteChecker ensures a directory is writable by creating a temp file.
+type DirWriteChecker struct{}
+
+func (DirWriteChecker) Check(dep DepInput) Result {
+	res := Result{Name: dep.Name, Type: dep.Type, Status: "OK"}
+	if dep.Name == "" {
+		res.Status = missingStatus(dep.Optional)
+		res.Details = "directory not provided"
+		return res
+	}
+	f, err := os.CreateTemp(dep.Name, ".buddy-check-*")
+	if err != nil {
+		res.Status = missingStatus(dep.Optional)
+		res.Details = fmt.Sprintf("not writable (%s)", dep.Hint)
+		return res
+	}
+	f.Close()
+	_ = os.Remove(f.Name())
+	return res
+}
+
+func relayTarget(raw string) (string, error) {
+	if raw == "" {
+		return "", fmt.Errorf("empty relay")
+	}
+	if strings.Contains(raw, "://") {
+		u, err := url.Parse(raw)
+		if err != nil {
+			return "", err
+		}
+		host := u.Host
+		if !strings.Contains(host, ":") {
+			port := "443"
+			if u.Scheme == "ws" || u.Scheme == "http" {
+				port = "80"
+			}
+			host = host + ":" + port
+		}
+		return host, nil
+	}
+	// assume host:port already
+	return raw, nil
 }
 
 func missingStatus(optional bool) string {

@@ -16,11 +16,13 @@ func runDepPreflight(cfg *config.Config, presetName string) error {
 		return nil
 	}
 	checkers := map[string]check.Checker{
-		"binary": check.BinaryChecker{},
-		"env":    check.EnvChecker{},
-		"file":   check.FileChecker{},
-		"url":    check.URLChecker{},
-		"port":   check.PortChecker{},
+		"binary":   check.BinaryChecker{},
+		"env":      check.EnvChecker{},
+		"file":     check.FileChecker{},
+		"url":      check.URLChecker{},
+		"port":     check.PortChecker{},
+		"relay":    check.RelayChecker{},
+		"dirwrite": check.DirWriteChecker{},
 	}
 	missing := 0
 	for _, d := range deps {

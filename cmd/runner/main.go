@@ -428,11 +428,13 @@ func runCheck(args []string) error {
 	}
 
 	checkers := map[string]check.Checker{
-		"binary": check.BinaryChecker{},
-		"env":    check.EnvChecker{},
-		"file":   check.FileChecker{},
-		"url":    check.URLChecker{},
-		"port":   check.PortChecker{},
+		"binary":   check.BinaryChecker{},
+		"env":      check.EnvChecker{},
+		"file":     check.FileChecker{},
+		"url":      check.URLChecker{},
+		"port":     check.PortChecker{},
+		"relay":    check.RelayChecker{},
+		"dirwrite": check.DirWriteChecker{},
 	}
 
 	results := make([]check.Result, 0, len(deps))

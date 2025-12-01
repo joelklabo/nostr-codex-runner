@@ -277,11 +277,13 @@ func wizardPreflight(cfg *config.Config, presetName string, p Prompter) error {
 		return nil
 	}
 	checkers := map[string]check.Checker{
-		"binary": check.BinaryChecker{},
-		"env":    check.EnvChecker{},
-		"file":   check.FileChecker{},
-		"url":    check.URLChecker{},
-		"port":   check.PortChecker{},
+		"binary":   check.BinaryChecker{},
+		"env":      check.EnvChecker{},
+		"file":     check.FileChecker{},
+		"url":      check.URLChecker{},
+		"port":     check.PortChecker{},
+		"relay":    check.RelayChecker{},
+		"dirwrite": check.DirWriteChecker{},
 	}
 
 	var missing int
