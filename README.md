@@ -80,10 +80,10 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 
 ## Configuration reference (plugins)
 `config.example.yaml` documents every field. Key knobs:
-- `transports[]: list of transports. Example (Nostr): see config.example.yaml; legacy relays still default to nostr.
+- `transports[]`: list of transports. Example (Nostr): see config.example.yaml; legacy relays still default to nostr.
 - `runner.allowed_pubkeys`: access control.
 - `runner.session_timeout_minutes`: idle cutoff before discarding a session mapping.
-- `codex.*`: CLI flags for Codex (sandbox, approval policy, working dir (defaults to your home), extra args, timeout).
+- `agent.config.*`: CLI-style knobs for the selected agent (binary, working dir, extra args, timeout). `agent.codex` remains as a backward-compatible alias.
 - `storage.path`: BoltDB file for state.
 - `logging.level`: `debug|info|warn|error`; `logging.format`: `text|json`.
 
@@ -144,7 +144,7 @@ transports:
     allowed_pubkeys: ["<operator_npub_hex>"]
 agent:
   type: copilotcli
-  codex:                # reused fields: set binary/working_dir/timeout
+  config:               # generic agent config (codex remains as a legacy alias)
     binary: copilot     # install via: npm install -g @github/copilot
     working_dir: .
     timeout_seconds: 120

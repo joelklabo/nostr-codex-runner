@@ -11,7 +11,7 @@ transports:
 
 agent:
   type: copilotcli
-  codex:
+  config:
     binary: copilot           # requires https://github.com/github/copilot-cli
     working_dir: .
     timeout_seconds: 120

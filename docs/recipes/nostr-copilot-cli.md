@@ -26,8 +26,8 @@ Fill the placeholders:
 
 Key knobs:
 - `agent.type: copilotcli` – switches to Copilot agent.
-- `agent.codex.binary` – path to `copilot` if not on PATH.
-- `agent.codex.extra_args` – e.g., `["--allow-all-tools"]` to let Copilot apply edits/execute without interactive approval.
+- `agent.config.binary` – path to `copilot` if not on PATH (legacy alias: `agent.codex.binary`).
+- `agent.config.extra_args` – e.g., `["--allow-all-tools"]` to let Copilot apply edits/execute without interactive approval (legacy alias: `agent.codex.extra_args`).
 - `actions` – enable/disable shell and fs actions or tighten allowlists.
 - `runner.initial_prompt` – a guardrail shown to Copilot on new sessions.
 
@@ -54,6 +54,6 @@ Replies come back over Nostr with the same session id.
 - Run the health endpoint with `-health-listen 127.0.0.1:8081` and watch logs.
 
 ## Troubleshooting
-- Copilot timeout: increase `agent.codex.timeout_seconds`.
-- `gh: command not found`: point `agent.codex.binary` to the absolute path of `gh`.
+- Copilot timeout: increase `agent.config.timeout_seconds`.
+- `copilot: command not found`: point `agent.config.binary` to the absolute path of `copilot`.
 - Empty replies: ensure Copilot CLI is enabled for your GitHub account.

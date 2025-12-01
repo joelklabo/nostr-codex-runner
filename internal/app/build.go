@@ -36,21 +36,22 @@ func Build(cfg *config.Config, st *store.Store, logger *slog.Logger) (*core.Runn
 		}
 	}
 
+	agentCfg := cfg.Agent.Config
 	var agent core.Agent
 	switch cfg.Agent.Type {
 	case "codexcli", "":
-		agent = codexcli.New(codexcli.Config(cfg.Agent.Codex))
+		agent = codexcli.New(codexcli.Config(agentCfg))
 	case "echo":
 		agent = echo.New()
 	case "http":
-		agent = http.New(http.Config{APIBase: cfg.Agent.Codex.Binary, Model: cfg.Agent.Codex.Profile}) // placeholder reuse fields
+		agent = http.New(http.Config{APIBase: agentCfg.Binary, Model: agentCfg.Profile}) // placeholder reuse fields
 	case "copilotcli":
 		agent = copilotcli.New(copilotcli.Config{
-			Binary:         cfg.Agent.Codex.Binary,
-			WorkingDir:     cfg.Agent.Codex.WorkingDir,
-			TimeoutSeconds: cfg.Agent.Codex.TimeoutSeconds,
+			Binary:         agentCfg.Binary,
+			WorkingDir:     agentCfg.WorkingDir,
+			TimeoutSeconds: agentCfg.TimeoutSeconds,
 			AllowAllTools:  false,
-			ExtraArgs:      cfg.Agent.Codex.ExtraArgs,
+			ExtraArgs:      agentCfg.ExtraArgs,
 		})
 	default:
 		return nil, fmt.Errorf("unknown agent type %s", cfg.Agent.Type)

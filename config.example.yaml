@@ -54,7 +54,7 @@ transports:
 
 agent:
   type: "codexcli"
-  codex:
+  config:                 # generic agent config; `codex` is kept as a legacy alias
     binary: "codex"
     sandbox: "danger-full-access"
     approval: "never"

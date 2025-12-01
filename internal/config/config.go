@@ -14,8 +14,9 @@ import (
 
 // Config holds the runtime configuration loaded from config.yaml.
 type Config struct {
-	Relays   []string      `yaml:"relays"`
-	Runner   RunnerConfig  `yaml:"runner"`
+	Relays []string     `yaml:"relays"`
+	Runner RunnerConfig `yaml:"runner"`
+	// Codex is kept for backward compatibility with legacy single-agent configs.
 	Codex    CodexConfig   `yaml:"codex"`
 	Storage  StorageConfig `yaml:"storage"`
 	Logging  LoggingConfig `yaml:"logging"`
@@ -81,10 +82,11 @@ type TransportConfig struct {
 }
 
 // AgentConfig holds agent selection and backend config.
+// The `config` field is generic; `codex` is kept as a legacy alias.
 type AgentConfig struct {
-	Type string `yaml:"type"`
-	// Codex CLI fields (type=codexcli)
-	Codex CodexConfig `yaml:"codex"`
+	Type   string      `yaml:"type"`
+	Config CodexConfig `yaml:"config"` // generic CLI-like config
+	Codex  CodexConfig `yaml:"codex"`  // legacy alias for backward compatibility
 }
 
 // ActionConfig defines an action plugin instance.
@@ -174,7 +176,7 @@ func (c *Config) applyDefaults(baseDir string) {
 		c.Runner.SessionTimeoutMins = 240
 	}
 	if strings.TrimSpace(c.Runner.InitialPrompt) == "" {
-		c.Runner.InitialPrompt = "You are an AI agent with shell access to this machine via Codex. Be concise, be careful, and always explain what you plan to do before running commands. Ask for confirmation before risky actions."
+		c.Runner.InitialPrompt = "You are an AI agent with shell access to this machine. Be concise, be careful, and always explain what you plan to do before running commands. Ask for confirmation before risky actions."
 	}
 	if c.Runner.ProfileName == "" {
 		c.Runner.ProfileName = "nostr-codex-runner"
@@ -182,22 +184,18 @@ func (c *Config) applyDefaults(baseDir string) {
 	if c.Runner.ProfileImage == "" {
 		c.Runner.ProfileImage = "https://raw.githubusercontent.com/joelklabo/nostr-codex-runner/main/assets/social-preview.svg"
 	}
-	if c.Codex.Sandbox == "" {
-		c.Codex.Sandbox = "danger-full-access"
+	// Normalize agent config (prefers agent.config, falls back to agent.codex, then root codex)
+	agentCfg := c.Agent.Config
+	if agentCfg.isZero() && !c.Agent.Codex.isZero() {
+		agentCfg = c.Agent.Codex
 	}
-	if c.Codex.Approval == "" {
-		c.Codex.Approval = "never"
+	if agentCfg.isZero() && !c.Codex.isZero() {
+		agentCfg = c.Codex
 	}
-	if c.Codex.Binary == "" {
-		c.Codex.Binary = "codex"
-	}
-	if c.Codex.WorkingDir == "" {
-		if home, err := os.UserHomeDir(); err == nil {
-			c.Codex.WorkingDir = home
-		} else {
-			c.Codex.WorkingDir = "."
-		}
-	}
+	applyCLIConfigDefaults(&agentCfg)
+	c.Agent.Config = agentCfg
+	// Keep legacy codex field filled for any older code paths.
+	c.Codex = agentCfg
 	if c.Codex.TimeoutSeconds == 0 {
 		c.Codex.TimeoutSeconds = 900 // 15 minutes
 	}
@@ -259,18 +257,52 @@ func (c *Config) applyDefaults(baseDir string) {
 	}
 	if c.Agent.Type == "" {
 		c.Agent.Type = "codexcli"
-		c.Agent.Codex = c.Codex
 	}
 	if len(c.Actions) == 0 {
 		c.Actions = []ActionConfig{{
 			Type:        "shell",
 			Name:        "shell",
-			Workdir:     c.Codex.WorkingDir,
-			TimeoutSecs: c.Codex.TimeoutSeconds,
+			Workdir:     agentCfg.WorkingDir,
+			TimeoutSecs: agentCfg.TimeoutSeconds,
 			MaxOutput:   c.Runner.MaxReplyChars,
 			Allowed:     []string{},
 		}}
 	}
+}
+
+// applyCLIConfigDefaults fills defaults for CLI-like agent configs.
+func applyCLIConfigDefaults(c *CodexConfig) {
+	if c.Sandbox == "" {
+		c.Sandbox = "danger-full-access"
+	}
+	if c.Approval == "" {
+		c.Approval = "never"
+	}
+	if c.Binary == "" {
+		c.Binary = "codex"
+	}
+	if c.WorkingDir == "" {
+		if home, err := os.UserHomeDir(); err == nil {
+			c.WorkingDir = home
+		} else {
+			c.WorkingDir = "."
+		}
+	}
+	if c.TimeoutSeconds == 0 {
+		c.TimeoutSeconds = 900 // 15 minutes
+	}
+}
+
+// isZero reports whether all fields are zero values.
+func (c CodexConfig) isZero() bool {
+	return c.Binary == "" &&
+		c.Sandbox == "" &&
+		c.Approval == "" &&
+		c.Profile == "" &&
+		c.WorkingDir == "" &&
+		len(c.ExtraArgs) == 0 &&
+		!c.SkipGitRepoCheck &&
+		c.TimeoutSeconds == 0
 }
 
 func expandPath(p string) string {
