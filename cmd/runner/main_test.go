@@ -384,7 +384,7 @@ func freePortAddr() string {
 	if err != nil {
 		return "127.0.0.1:0"
 	}
-	defer l.Close()
+	defer func() { _ = l.Close() }()
 	return l.Addr().String()
 }
 
