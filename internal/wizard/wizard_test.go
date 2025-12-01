@@ -12,10 +12,10 @@ func TestRunWritesConfig(t *testing.T) {
 	td := t.TempDir()
 	path := filepath.Join(td, "config.yaml")
 	p := &StubPrompter{
-		Selects:   []string{"nostr", "echo"},
-		Inputs:    []string{"wss://relay.example", "deadbeef"},
+		Selects:   []string{"mock-echo"},
+		Inputs:    []string{}, // no nostr prompts for mock preset
 		Passwords: []string{"abcd1234"},
-		Confirms:  []bool{true, false}, // overwrite? enable shell? dry-run?
+		Confirms:  []bool{true, false}, // overwrite? dry-run?
 	}
 	got, err := Run(context.Background(), path, p)
 	if err != nil {
@@ -29,7 +29,7 @@ func TestRunWritesConfig(t *testing.T) {
 		t.Fatalf("read config: %v", err)
 	}
 	content := string(data)
-	if !containsAll(content, []string{"private_key: abcd1234", "allowed_pubkeys:", "shell"}) {
+	if !strings.Contains(content, "type: mock") {
 		t.Fatalf("config missing expected fields:\n%s", content)
 	}
 }
@@ -38,10 +38,10 @@ func TestRunRequiresAllowedPubkey(t *testing.T) {
 	td := t.TempDir()
 	path := filepath.Join(td, "config.yaml")
 	p := &StubPrompter{
-		Selects:   []string{"nostr", "echo"},
-		Inputs:    []string{"wss://relay.example", ""},
+		Selects:   []string{"claude-dm"},
+		Inputs:    []string{"", ""}, // relays blank, allowed blank
 		Passwords: []string{"abcd1234"},
-		Confirms:  []bool{false, false},
+		Confirms:  []bool{false}, // overwrite?
 	}
 	_, err := Run(context.Background(), path, p)
 	if err == nil {

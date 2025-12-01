@@ -12,6 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/joelklabo/buddy/internal/config"
+	"github.com/joelklabo/buddy/internal/presets"
 )
 
 // Prompter abstracts survey for testability.
@@ -46,108 +47,106 @@ func Run(ctx context.Context, path string, p Prompter) (string, error) {
 
 	reg := GetRegistry()
 
-	transportOptions := transportNames(reg.Transports)
-	transportChoice, err := p.AskSelect("Transport", transportOptions, defaultChoice("nostr", transportOptions))
+	presetNames := presetNames(reg)
+	presetChoice, err := p.AskSelect("Pick a preset", presetNames, defaultChoice("mock-echo", presetNames))
 	if err != nil {
 		return "", err
 	}
 
-	var relays string
-	var priv string
-	var allowedKeys []string
-
-	if transportChoice == "nostr" {
-		if relays, err = p.AskInput("Relays (comma-separated)", "wss://relay.damus.io,wss://nos.lol"); err != nil {
-			return "", err
-		}
-
-		for retries := 0; retries < 2; retries++ {
-			priv, err = p.AskPassword("Nostr private key (hex, not nsec)")
-			if err != nil {
-				return "", err
-			}
-			if len(priv) > 0 {
-				break
-			}
-		}
-		if len(priv) == 0 {
-			return "", errors.New("private key is required")
-		}
-
-		var allowed string
-		for retries := 0; retries < 2; retries++ {
-			allowed, err = p.AskInput("Allowed pubkeys (comma-separated hex)", "")
-			if err != nil {
-				return "", err
-			}
-			allowedKeys = splitCSV(allowed)
-			if len(allowedKeys) > 0 {
-				break
-			}
-		}
-		if len(allowedKeys) == 0 {
-			return "", errors.New("at least one allowed pubkey required")
-		}
-	}
-
-	agentOptions := agentNames(reg.Agents)
-	agentChoice, err := p.AskSelect("Agent", agentOptions, defaultChoice("http", agentOptions))
-	if err != nil {
-		return "", err
-	}
-
-	enableShell := actionDefault(reg.Actions, "shell")
-	if _, err := actionOption(reg.Actions, "shell"); err == nil {
-		enableShell, err = p.AskConfirm("Enable shell action? (high risk; trusted operators only)", enableShell)
+	// Load preset if available; otherwise start blank.
+	var cfg *config.Config
+	if data, err := presets.Get(presetChoice); err == nil {
+		cfg, err = loadPresetConfig(data)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("load preset %s: %w", presetChoice, err)
 		}
-	}
-	dryRun, err := p.AskConfirm("Dry-run only (preview config without writing)?", false)
-	if err != nil {
-		return "", err
-	}
-
-	cfg := &config.Config{
-		Runner: config.RunnerConfig{
-			PrivateKey:     priv,
-			AllowedPubkeys: allowedKeys,
-		},
-		Storage:    config.StorageConfig{Path: defaultStatePath()},
-		Transports: []config.TransportConfig{},
-		Agent:      config.AgentConfig{Type: agentChoice},
-		Actions: []config.ActionConfig{{
-			Type:  "readfile",
-			Name:  "readfile",
-			Roots: []string{"."},
-		}},
-		Projects: []config.Project{{ID: "default", Name: "default", Path: "."}},
-	}
-
-	if transportChoice == "nostr" {
-		cfg.Transports = append(cfg.Transports, config.TransportConfig{
-			Type:           "nostr",
-			ID:             "nostr",
-			Relays:         splitCSV(relays),
-			PrivateKey:     priv,
-			AllowedPubkeys: allowedKeys,
-		})
 	} else {
-		cfg.Transports = append(cfg.Transports, config.TransportConfig{
-			Type: "mock",
-			ID:   "mock",
-		})
+		cfg = &config.Config{}
 	}
 
-	if enableShell {
-		cfg.Actions = append(cfg.Actions, config.ActionConfig{Type: "shell", Name: "shell", Workdir: ".", TimeoutSecs: 30, MaxOutput: 4000})
+	// Ensure minimal defaults.
+	if cfg.Storage.Path == "" {
+		cfg.Storage.Path = defaultStatePath()
 	}
-
 	if cfg.Logging.Level == "" {
 		cfg.Logging.Level = "info"
 	}
 	if cfg.Logging.Format == "" {
 		cfg.Logging.Format = "text"
+	}
+	if len(cfg.Projects) == 0 {
+		cfg.Projects = []config.Project{{ID: "default", Name: "default", Path: "."}}
+	}
+	// If no nostr transport, ensure runner keys are non-empty to satisfy validation.
+	if !hasNostr(cfg.Transports) {
+		if cfg.Runner.PrivateKey == "" {
+			cfg.Runner.PrivateKey = "mock"
+		}
+		if len(cfg.Runner.AllowedPubkeys) == 0 {
+			cfg.Runner.AllowedPubkeys = []string{"mock"}
+		}
+	}
+
+	// If preset includes nostr transport, collect secrets/relays if missing.
+	for i := range cfg.Transports {
+		t := &cfg.Transports[i]
+		if t.Type != "nostr" {
+			continue
+		}
+		if len(t.Relays) == 0 {
+			relays, err := p.AskInput("Relays (comma-separated)", "wss://relay.damus.io,wss://nos.lol")
+			if err != nil {
+				return "", err
+			}
+			t.Relays = splitCSV(relays)
+		}
+		if t.PrivateKey == "" {
+			pk, err := p.AskPassword("Nostr private key (hex, not nsec)")
+			if err != nil {
+				return "", err
+			}
+			if pk == "" {
+				return "", errors.New("private key is required")
+			}
+			t.PrivateKey = pk
+			cfg.Runner.PrivateKey = pk
+		}
+		if len(t.AllowedPubkeys) == 0 {
+			allowed, err := p.AskInput("Allowed pubkeys (comma-separated hex)", "")
+			if err != nil {
+				return "", err
+			}
+			keys := splitCSV(allowed)
+			if len(keys) == 0 {
+				return "", errors.New("at least one allowed pubkey required")
+			}
+			t.AllowedPubkeys = keys
+			cfg.Runner.AllowedPubkeys = keys
+		}
+	}
+
+	// Shell action prompt only if shell not already enabled.
+	hasShell := false
+	for _, a := range cfg.Actions {
+		if a.Type == "shell" {
+			hasShell = true
+			break
+		}
+	}
+	if !hasShell {
+		enableShell := actionDefault(reg.Actions, "shell")
+		enableShell, err = p.AskConfirm("Enable shell action? (high risk; trusted operators only)", enableShell)
+		if err != nil {
+			return "", err
+		}
+		if enableShell {
+			cfg.Actions = append(cfg.Actions, config.ActionConfig{Type: "shell", Name: "shell", Workdir: ".", TimeoutSecs: 30, MaxOutput: 4000})
+		}
+	}
+
+	dryRun, err := p.AskConfirm("Dry-run only (preview config without writing)?", false)
+	if err != nil {
+		return "", err
 	}
 
 	if dryRun {
@@ -294,6 +293,80 @@ func actionDefault(actions []ActionOption, name string) bool {
 		return false
 	}
 	return a.DefaultEnable
+}
+
+func presetNames(reg Registry) []string {
+	names := make([]string, 0, len(reg.Presets))
+	for _, p := range reg.Presets {
+		names = append(names, p.Name)
+	}
+	return names
+}
+
+func hasNostr(ts []config.TransportConfig) bool {
+	for _, t := range ts {
+		if t.Type == "nostr" {
+			return true
+		}
+	}
+	return false
+}
+
+func loadPresetConfig(data []byte) (*config.Config, error) {
+	var cfg config.Config
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("parse preset: %w", err)
+	}
+	applyPresetDefaults(&cfg)
+	if !hasNostr(cfg.Transports) {
+		if cfg.Runner.PrivateKey == "" {
+			cfg.Runner.PrivateKey = "mock"
+		}
+		if len(cfg.Runner.AllowedPubkeys) == 0 {
+			cfg.Runner.AllowedPubkeys = []string{"mock"}
+		}
+	}
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+func applyPresetDefaults(cfg *config.Config) {
+	if cfg.Runner.MaxReplyChars == 0 {
+		cfg.Runner.MaxReplyChars = 8000
+	}
+	if cfg.Runner.SessionTimeoutMins == 0 {
+		cfg.Runner.SessionTimeoutMins = 240
+	}
+	if strings.TrimSpace(cfg.Runner.InitialPrompt) == "" {
+		cfg.Runner.InitialPrompt = "You are an AI agent with shell access to this machine. Be concise, be careful, and always explain what you plan to do before running commands. Ask for confirmation before risky actions."
+	}
+	if cfg.Runner.ProfileName == "" {
+		cfg.Runner.ProfileName = "buddy"
+	}
+	if cfg.Runner.ProfileImage == "" {
+		cfg.Runner.ProfileImage = "https://raw.githubusercontent.com/joelklabo/buddy/main/assets/social-preview.svg"
+	}
+	if cfg.Storage.Path == "" {
+		cfg.Storage.Path = defaultStatePath()
+	}
+	if cfg.Logging.Level == "" {
+		cfg.Logging.Level = "info"
+	}
+	if cfg.Logging.Format == "" {
+		cfg.Logging.Format = "text"
+	}
+	if len(cfg.Actions) == 0 {
+		cfg.Actions = []config.ActionConfig{{
+			Type:  "readfile",
+			Name:  "readfile",
+			Roots: []string{"."},
+		}}
+	}
+	if len(cfg.Projects) == 0 {
+		cfg.Projects = []config.Project{{ID: "default", Name: "default", Path: "."}}
+	}
 }
 
 // StubPrompter is used in tests.
