@@ -76,6 +76,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - [Open issues](https://github.com/joelklabo/nostr-codex-runner/issues)
 - [CI workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/ci.yml)
 - [Release workflow](https://github.com/joelklabo/nostr-codex-runner/actions/workflows/release.yml)
+- [Recipe: Nostr + Copilot CLI](docs/recipes/nostr-copilot-cli.md)
 
 ## Configuration reference (plugins)
 `config.example.yaml` documents every field. Key knobs:
