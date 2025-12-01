@@ -34,6 +34,7 @@ These are all composable—pick any transport + one agent + any actions in `conf
 - Stay keyboard-only and remote: send prompts via Nostr DMs, get Codex replies back as DMs.
 - Keep conversation context: runner tracks Codex `thread_id` per sender and resumes automatically.
 - Minimal surface area: single binary, YAML config, and one background process.
+- Inspiration: [warelay](https://github.com/steipete/warelay) for its plug-and-play relay approach.
 
 ## Command mini-DSL (DM payloads)
 - `/new [prompt]` — reset session; optional prompt starts a fresh session.
