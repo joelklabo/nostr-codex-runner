@@ -37,3 +37,4 @@ buddy wizard [config-path]
 - Writes to buddy paths by default; pass a custom path to override.
 - Same config search order as `buddy run` applies when you start the runner.
 - To bypass prereq checks when experimenting, re-run wizard and decline to continue if missing deps (or add them and rerun).
+- Privacy & safety: the wizard only prints summaries (no secrets), asks before overwriting files, and stores secrets locally in your config. It does not phone home or emit telemetry.
