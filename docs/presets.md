@@ -25,6 +25,10 @@ Preset names are positional arguments to `buddy run <preset>`. They can be overr
 ## Collision handling
 - If a user file overrides a built-in preset, `buddy presets <name>` should indicate that it is using the override path.
 
+## Dependency hints
+- Presets can declare prerequisites (binaries/env/urls/ports). Run `buddy check <preset>` to see if your environment is ready; add `--json` for scripts.
+- Examples: `copilot-shell` expects the `copilot` binary; `claude-dm` will optionally probe `https://api.anthropic.com`; `local-llm` can warn if `127.0.0.1:11434` (ollama default) is closed.
+
 ## Open items
 - Finalize HTTP agent schema for `claude-dm` (provider field vs URL + headers).
 - Decide whether `mock-echo` ships by default or only as a wizard option.

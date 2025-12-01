@@ -38,6 +38,7 @@ curl -fsSL https://get.buddy.sh | sh       # script installer (downloads release
 buddy run <preset|config>      start the runner
 buddy wizard [config-path]     guided setup; supports --dry-run
 buddy presets [name]           list built-ins or show details
+buddy check <preset|config>    verify dependencies (use --json for machine output)
 buddy version                  show version
 buddy help                     show help
 ```
