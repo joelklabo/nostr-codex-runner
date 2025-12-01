@@ -116,6 +116,7 @@ The runner only needs outbound internet for its transport (e.g., Nostr relays). 
 - [Recipe: Nostr + Copilot CLI](docs/recipes/nostr-copilot-cli.md)
 - [Recipe: WhatsApp + Codex](docs/recipes/whatsapp-codex.md)
 - [Recipe: systemd service](docs/recipes/systemd.md)
+- [Recipe: Docker run](docs/recipes/docker.md)
 
 ## Configuration reference (plugins)
 
