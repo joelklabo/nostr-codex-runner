@@ -33,7 +33,7 @@
 
 ## Commit & Pull Request Guidelines
 
-- One issue per commit; reference the `bd` ticket in the subject, e.g. `a2d.2: harden DM dedup` or `Add replay debounce (closes nostr-codex-runner-3oa.3)`. Keep subjects imperative.
+- One issue per commit; reference the `bd` ticket in the subject, e.g. `a2d.2: harden DM dedup` or `Add replay debounce (closes buddy-3oa.3)`. Keep subjects imperative.
 - PRs: include a short summary, linked issue, and **Testing** section listing commands run (`make test`, `make run` smoke, etc.). Note config/ops changes and any backward-incompatible defaults.
 - Keep changes small and scoped; avoid combining refactors with feature work.
 

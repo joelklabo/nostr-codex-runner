@@ -261,7 +261,6 @@ func configSearchOrder() []string {
 	paths = append(paths, "config.yaml (cwd)")
 	if home, err := os.UserHomeDir(); err == nil {
 		paths = append(paths, filepath.Join(home, ".config", "buddy", "config.yaml"))
-		paths = append(paths, filepath.Join(home, ".config", "nostr-codex-runner", "config.yaml")+" (legacy)")
 	}
 	return paths
 }

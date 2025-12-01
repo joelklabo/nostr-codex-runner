@@ -46,8 +46,8 @@ Testing notes
 - For nostr-dependent tests, use mock transport or inject relay URLs via test config.
 
 bd workflow
-- One issue per commit; create under epic `nostr-codex-runner-3oa`.
-- Commit message should close the issue, e.g., `Some change (closes nostr-codex-runner-3oa.X)`.
+- One issue per commit; create under epic `buddy-3oa`.
+- Commit message should close the issue, e.g., `Some change (closes buddy-3oa.X)`.
 
 After rename
 - Module path is `github.com/joelklabo/buddy`.

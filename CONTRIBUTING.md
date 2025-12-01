@@ -3,7 +3,7 @@
 Thanks for helping improve the project! This repo uses `bd` for issue tracking and expects **one commit per closed issue**.
 
 ## How we work
-- Current epic: `nostr-codex-runner-3oa` (buddy docs/wizard/CLI). Create or pick an issue under it: `bd create --parent nostr-codex-runner-3oa ...`.
+- Current epic: `buddy-3oa` (buddy docs/wizard/CLI). Create or pick an issue under it: `bd create --parent buddy-3oa ...`.
 - Keep work focused: one logical change per issue; close the issue with a commit that references it.
 - Prefer small PRs with context and testing notes.
 - Binary-first mindset: assume users install `buddy` via release/tap, not by cloning the repo.
@@ -17,7 +17,7 @@ Thanks for helping improve the project! This repo uses `bd` for issue tracking a
 - Run: `make run` (expects `config.yaml`) or `buddy run <preset|config>` once the binary rename lands.
 
 ## Commit and PR guidelines
-- Reference the `bd` issue in the commit subject, e.g. `Quick install outline (closes nostr-codex-runner-3oa.2)`.
+- Reference the `bd` issue in the commit subject, e.g. `Quick install outline (closes buddy-3oa.2)`.
 - Keep commit messages in imperative mood; avoid squashing unrelated work together.
 - Include a short testing section in PR descriptions (commands run, notable results).
 
