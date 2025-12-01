@@ -5,7 +5,7 @@ You can build and run the runner in a container. This is useful for testing or k
 ## Build the image
 
 ```bash
-docker build -t nostr-codex-runner:local .
+docker build -t buddy:local .
 ```
 
 ## Prepare config and state dirs
@@ -22,9 +22,9 @@ cp config.example.yaml $PWD/config.yaml
 docker run --rm \
   -v $PWD/config.yaml:/app/config.yaml:ro \
   -v $PWD/.data:/app/data \
-  -e NCR_CONFIG=/app/config.yaml \
-  nostr-codex-runner:local \
-  ./nostr-codex-runner run -config /app/config.yaml
+  -e BUDDY_CONFIG=/app/config.yaml \
+  buddy:local \
+  ./buddy run -config /app/config.yaml
 ```
 
 Notes:
