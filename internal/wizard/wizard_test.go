@@ -94,3 +94,24 @@ func TestSetRegistryOverridesOptions(t *testing.T) {
 		t.Fatalf("run with custom registry: %v", err)
 	}
 }
+
+func TestRunDryRunDoesNotWriteFile(t *testing.T) {
+	td := t.TempDir()
+	path := filepath.Join(td, "config.yaml")
+	p := &StubPrompter{
+		Selects:   []string{"mock-echo"},
+		Inputs:    []string{},
+		Passwords: []string{"abcd1234"},
+		Confirms:  []bool{true, true}, // overwrite? dry-run?
+	}
+	got, err := Run(context.Background(), path, p)
+	if err != nil {
+		t.Fatalf("run dry-run: %v", err)
+	}
+	if got != path {
+		t.Fatalf("expected path %s, got %s", path, got)
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Fatalf("config should not be written on dry-run")
+	}
+}

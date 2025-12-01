@@ -1,93 +1,66 @@
 # Copy to config.yaml and fill in your keys.
-relays:
-  - wss://relay.damus.io
-  - wss://relay.snort.social
-  - wss://relay.nostr.band
 
 runner:
   private_key: ""          # hex-encoded nsec secret (do NOT commit)
   allowed_pubkeys:
     - ""                   # hex pubkeys allowed to issue commands
-  auto_reply: true
   max_reply_chars: 8000
   session_timeout_minutes: 240
   initial_prompt: |
-    You are an AI agent with shell access to this machine via Codex. Be concise, be careful, and always explain what you plan to do before running commands. Ask for confirmation before risky actions.
+    You are an AI agent with shell access to this machine. Be concise, be careful, and always explain what you plan to do before running commands. Ask for confirmation before risky actions.
   profile_name: "buddy"
   profile_image: "https://raw.githubusercontent.com/joelklabo/buddy/main/assets/social-preview.svg"
 
-codex:
-  binary: "codex"
-  sandbox: "danger-full-access"
-  approval: "never"
-  profile: ""
-  working_dir: "~"          # defaults to your home; use '/' if you truly want root
-  extra_args:
-    - "--dangerously-bypass-approvals-and-sandbox"
-  skip_git_repo_check: true
-  timeout_seconds: 900
-
 storage:
-  path: "state.db"
+  path: "~/.buddy/state.db"
 
 logging:
   level: "info"
   file: "~/.buddy/runner.log"  # optional file log in addition to stdout
 
-# Projects for bd workspaces (path should contain .beads)
 projects:
   - id: "default"
-    name: "Nostr Codex Runner"
+    name: "Default"
     path: "."
 
-# Plugin-based config (defaults derived from above if omitted)
 transports:
   - type: "nostr"
     id: "nostr"
     relays:
       - wss://relay.damus.io
-      - wss://relay.snort.social
-      - wss://relay.nostr.band
+      - wss://nos.lol
     private_key: ""          # hex
     allowed_pubkeys:
       - ""
-  # - type: "whatsapp"
-  #   id: "whatsapp"
-  #   config:
-  #     account_sid: "ACxxxxxxxx"
-  #     auth_token: "your_twilio_auth_token"
-  #     from_number: "whatsapp:+15550001234"
-  #     listen: ":8083"
-  #     path: "/twilio/webhook"
-  #     allowed_numbers:
-  #       - "15555550100"
+# - type: "mock"
+#   id: "mock"
+#   config: {}
 
 agent:
-  type: "codexcli"
-  config:                 # generic agent config; `codex` is kept as a legacy alias
-    binary: "codex"
+  type: "echo"               # or "http", "copilotcli", "codexcli"
+  config:
+    binary: "codex"          # used by CLI-style agents; ignored by echo
     sandbox: "danger-full-access"
     approval: "never"
-    profile: ""
     working_dir: "~"
-    extra_args:
-      - "--dangerously-bypass-approvals-and-sandbox"
+    extra_args: []
     skip_git_repo_check: true
     timeout_seconds: 900
 
 actions:
-  - type: "shell"
-    name: "shell"
-    workdir: "~"
-    allowed: []
-    timeout_seconds: 120
-    max_output: 8000
   - type: "readfile"
     name: "readfile"
     roots:
       - "."
-  - type: "writefile"
-    name: "writefile"
-    roots:
-      - "."
-    allow_write: false
+  # Enable shell only for trusted operators.
+  # - type: "shell"
+  #   name: "shell"
+  #   workdir: "~"
+  #   allowed: []
+  #   timeout_seconds: 120
+  #   max_output: 8000
+  # - type: "writefile"
+  #   name: "writefile"
+  #   roots:
+  #     - "."
+  #   allow_write: false

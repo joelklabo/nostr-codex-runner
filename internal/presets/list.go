@@ -1,6 +1,10 @@
 package presets
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
 
 // List returns preset names and descriptions.
 func List() map[string]string {
@@ -14,6 +18,9 @@ func List() map[string]string {
 
 // Get returns the raw YAML for a preset, or an error if unknown.
 func Get(name string) ([]byte, error) {
+	if data, ok := loadOverride(name); ok {
+		return data, nil
+	}
 	switch name {
 	case "claude-dm":
 		return ClaudeDM, nil
@@ -26,4 +33,23 @@ func Get(name string) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unknown preset %s", name)
 	}
+}
+
+// loadOverride returns user/project preset overrides if present.
+func loadOverride(name string) ([]byte, bool) {
+	for _, path := range overridePaths(name) {
+		if data, err := os.ReadFile(path); err == nil {
+			return data, true
+		}
+	}
+	return nil, false
+}
+
+func overridePaths(name string) []string {
+	var paths []string
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths, filepath.Join(home, ".config", "buddy", "presets", name+".yaml"))
+	}
+	paths = append(paths, filepath.Join("presets", name+".yaml"))
+	return paths
 }

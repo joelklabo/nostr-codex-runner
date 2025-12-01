@@ -1,6 +1,6 @@
 # Quick Install Path (binary-first) – Outline
 
-Goal: 2-minute path to download buddy, verify, run a preset or wizard. No git clone.
+Goal: 2-minute path to download buddy, verify, run the wizard or a preset. No git clone.
 
 ## Flow to document
 1) Choose install method
@@ -21,11 +21,12 @@ Goal: 2-minute path to download buddy, verify, run a preset or wizard. No git cl
    - Alternative: `buddy run claude-dm` or `buddy run local-llm` (if offline/local model configured).
 
 5) 2-minute smoke test
-   - Show expected output after start: logs line with listening relay/preset; instructions: "DM me from allowed pubkey: /new hello" or for mock transport: `curl` example.
+   - Show expected output after start: logs line with listening relay/preset; instructions: "DM me from allowed pubkey: /new hello" for nostr, or use mock preset for offline (`buddy run mock-echo` runs without relays; inject via tests, not DMs).
    - Success criteria: receives first response; exits on Ctrl+C.
 
 6) Where files live
-   - Binary path, config search order: argv path > cwd config.yaml > ~/.config/buddy/config.yaml.
+   - Binary path, config search order: argv path > `BUDDY_CONFIG` env > cwd config.yaml > `~/.config/buddy/config.yaml`.
+   - State DB: `~/.buddy/state.db`. Logs: stdout by default; optional `~/.buddy/runner.log`.
    - Presets directory (embedded / assets/presets) and user overrides (`~/.config/buddy/presets` if present).
 
 7) Prerequisites

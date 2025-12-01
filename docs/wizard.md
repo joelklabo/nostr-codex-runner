@@ -19,11 +19,11 @@ buddy wizard [config-path]
 5) **Dry-run?** preview without writing.
 
 ## What it writes
-- Transport: nostr with your relays and keys
+- Transport: nostr with your relays and keys (or mock if chosen)
 - Agent: chosen type
 - Actions: readfile always; shell if enabled
 - Projects: default project at `.`
-- Storage: `~/.local/share/buddy/state.db`
+- Storage: `~/.buddy/state.db`
 
 ## After running
 - Output shows the config path.

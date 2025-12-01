@@ -6,7 +6,7 @@ Design target: minimal flags, positional arguments, fast muscle memory, clear he
 - `buddy run <preset|config>`
   - If the argument matches a shipped preset name, load that preset and merge user overrides.
   - Otherwise treat as a file path to a config YAML (relative or absolute).
-  - Optional second arg for override preset dir? (TBD — prefer search path instead of flags.)
+  - Flags: `-config <path>` (default search order), `-skip-check`, `-health-listen`, `-metrics-listen`.
   - Output: startup summary (transport, agent, actions, config path), then structured logs.
   - Exit codes: 0 clean exit, 2 config/preset not found, 3 validation error, 4 runtime fatal.
 
@@ -18,6 +18,13 @@ Design target: minimal flags, positional arguments, fast muscle memory, clear he
 - `buddy presets`
   - Lists built-in presets with one-line description and required secrets.
   - `buddy presets <name>` shows details for a single preset (inputs, actions, sample command).
+
+- `buddy check <preset|config>`
+  - Verifies declared dependencies (binary/env/file/url/port/relay/dirwrite).
+  - Flags: `-config <path>` (same search order), `-json` for machine-readable output.
+
+- `buddy init-config [path]`
+  - Writes the bundled example config to `./config.yaml` (or provided path) if missing.
 
 - `buddy help`
   - Short usage and pointers; `buddy help run|wizard|presets` for detail.
@@ -41,8 +48,10 @@ Design target: minimal flags, positional arguments, fast muscle memory, clear he
 ## Help copy (draft)
 ```
 buddy run <preset|config>      start the runner from a preset or YAML config
+buddy check <preset|config>    verify dependencies (json optional)
 buddy wizard [config-path]     guided setup; writes a config
 buddy presets [name]           list built-in presets or show one
+buddy init-config [path]       write example config if missing
 buddy help [cmd]               show help
 buddy version                  show version info
 ```

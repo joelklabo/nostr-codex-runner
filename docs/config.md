@@ -8,9 +8,9 @@ Scope: key fields for buddy configs and presets. See `config.example.yaml` for t
 3) `~/.config/buddy/config.yaml`
 
 ## Preset search order
-1) Embedded presets shipped with the binary
-2) `~/.config/buddy/presets/<name>.yaml`
-3) `./presets/<name>.yaml` (optional project overrides)
+1) `~/.config/buddy/presets/<name>.yaml` (user overrides)
+2) `./presets/<name>.yaml` (project overrides)
+3) Embedded presets shipped with the binary (fallback)
 
 ## Top-level fields
 | Field | Type | Default | Notes |
@@ -72,7 +72,10 @@ Scope: key fields for buddy configs and presets. See `config.example.yaml` for t
 - `meta.secrets`: list of required secrets (for display only).
 - `meta.safety`: notes (e.g., shell risk).
 
-## Validation tips
-- Ensure nostr keys are hex, 64 chars.
+## Defaults and validation tips
+- If no transports are provided, config defaults to a nostr transport using runner keys.
+- If transports exclude nostr, runner keys/allowlist fall back to `"mock"` to keep validation green; provide real keys for nostr.
+- If no actions are provided, a `readfile` action is auto-added with roots rooted at the config directory.
+- Ensure nostr keys are hex, 64 chars (npub values are normalized to hex).
 - Keep allowlists non-empty when transports enable actions.
 - Avoid enabling `shell` in public/unknown environments.

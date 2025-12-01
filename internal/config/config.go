@@ -220,6 +220,20 @@ func (c *Config) applyDefaults(baseDir string) {
 			c.Projects[i].Path = abs
 		}
 	}
+	if len(c.Actions) == 0 {
+		root := baseDir
+		if root == "" {
+			root = "."
+		}
+		if abs, err := filepath.Abs(root); err == nil {
+			root = abs
+		}
+		c.Actions = []ActionConfig{{
+			Type:  "readfile",
+			Name:  "readfile",
+			Roots: []string{root},
+		}}
+	}
 	if c.Storage.Path == "" {
 		if home, err := os.UserHomeDir(); err == nil {
 			c.Storage.Path = filepath.Join(home, ".buddy", "state.db")
@@ -243,6 +257,21 @@ func (c *Config) applyDefaults(baseDir string) {
 			AllowedPubkeys: c.Runner.AllowedPubkeys,
 			Config:         map[string]any{},
 		}}
+	}
+	hasNostr := false
+	for _, t := range c.Transports {
+		if t.Type == "nostr" {
+			hasNostr = true
+			break
+		}
+	}
+	if !hasNostr {
+		if c.Runner.PrivateKey == "" {
+			c.Runner.PrivateKey = "mock"
+		}
+		if len(c.Runner.AllowedPubkeys) == 0 {
+			c.Runner.AllowedPubkeys = []string{"mock"}
+		}
 	}
 	if c.Agent.Type == "" {
 		c.Agent.Type = "codexcli"

@@ -17,7 +17,7 @@ Goal: one landing page that routes **Users** and **Contributors** quickly, keepi
 4) FAQ / Troubleshooting
    - Install/path issues, relay/auth, BoltDB lock, missing keys, collision with other `buddy` CLIs.
 5) Recipes
-   - Links to task-specific guides (Nostr + Claude, Local LLM offline, Custom action trigger, Systemd/service, Docker usage).
+   - Links to task-specific guides (Nostr + Claude, Local LLM offline, Local LLM mock override, Custom action trigger, Systemd/service, Docker usage).
 6) Security quick note
    - Allowlist, secret logging stance; link to full Security doc.
 7) Releases / Changelog
@@ -45,5 +45,5 @@ Goal: one landing page that routes **Users** and **Contributors** quickly, keepi
 - README (short), Releases, Security policy, Code of Conduct, License.
 
 ## Open items / placeholders
-- Update URLs after repo rename and installer URL is finalized.
-- Finalize preset list and commands when CLI spec (issue 3oa.26) lands.
+- Publish docs under the renamed `buddy` repo and confirm installer URL (`https://get.buddy.sh`) is stable.
+- Finalize preset list and commands when CLI spec stabilizes (current set: claude-dm, copilot-shell, local-llm, mock-echo).

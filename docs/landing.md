@@ -3,17 +3,17 @@
 Purpose: Single-page content (can be GitHub Pages or README front) highlighting install, presets, wizard, and contributing.
 
 ## Hero
-- Headline: “Run AI agents over Nostr in minutes.”
+- Headline: “Run AI agents in minutes.”
 - Subhead: “Binary-first CLI with presets, wizard, and safe defaults.”
-- Buttons: `brew install joelklabo/tap/buddy`, `buddy wizard`, `buddy run mock-echo`.
+- Buttons: `brew install joelklabo/tap/buddy`, `buddy wizard`, `buddy run claude-dm` (or `mock-echo` offline).
 
 ## Proof/Badges
 - CI, Release, Coverage badges (reuse README).
 
 ## Quickstart (3 steps)
 1) Install (brew or script).
-2) Pick a preset: mock-echo, claude-dm, copilot-shell, local-llm.
-3) DM `/new` from an allowed pubkey (or run offline with mock).
+2) Run `buddy wizard` (writes `~/.config/buddy/config.yaml`) or pick a preset: mock-echo, claude-dm, copilot-shell, local-llm.
+3) Start `buddy run <preset|config>`; DM `/new` from an allowed pubkey for nostr presets. Use `mock-echo` for offline smoke (no DMs; inject via test harness).
 
 ## Why Buddy
 - Pluggable transports → agents → actions.

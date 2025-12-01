@@ -20,12 +20,11 @@ curl -fsSL https://get.buddy.sh | sh       # script installer (downloads release
 ## Quick start — 3 steps
 
 1) **Install**: `brew install joelklabo/tap/buddy` (or the curl script above).
-2) **Pick a preset or wizard**:
-   - `buddy run mock-echo` (zero secrets, offline)
-   - `buddy run claude-dm` (Nostr → Claude/OpenAI HTTP)
-   - `buddy run copilot-shell` (Copilot + shell; trusted operators only)
-   - or `buddy wizard` to generate `~/.config/buddy/config.yaml` interactively.
-3) **DM it**: from an allowed pubkey, send `/new` and try a prompt. Stop with Ctrl+C.
+2) **Configure**: run `buddy wizard` (recommended). Pick a preset, enter relays/keys, and it writes `~/.config/buddy/config.yaml`.  
+   - `buddy presets` shows built-ins (`claude-dm`, `copilot-shell`, `local-llm`, `mock-echo`).  
+   - `buddy init-config` copies the example YAML if you prefer manual edits.
+3) **Run**: `buddy run -config ~/.config/buddy/config.yaml` (or `buddy run <preset>` after filling secrets via wizard/override).  
+   For nostr transports, DM `/new` from an allowed pubkey. Mock transport is for tests/offline and does not take DMs directly.
 
 ## What it does
 - **Transports**: Nostr DMs (default) or mock; pluggable others.
@@ -44,7 +43,7 @@ buddy help                     show help
 ```
 
 ## Config search order
-1) Positional/flag: `buddy run <preset|path>` (flag `-config` still works)
+1) Positional/flag: `buddy run <preset|path>` (flag `-config` still works; env `BUDDY_CONFIG` preferred)
 2) `./config.yaml`
 3) `~/.config/buddy/config.yaml`
 
@@ -55,6 +54,7 @@ buddy help                     show help
 - Config reference: `docs/config.md`
 - Wizard: `docs/wizard.md`
 - Presets: `docs/presets.md`
+  - Override presets by dropping YAML in `~/.config/buddy/presets/<name>.yaml` (or `./presets/<name>.yaml`); built-ins are the fallback.
 
 ## Want to help?
 - Read `CONTRIBUTING.md` (setup, style, test expectations) and peek at the `buddy-3oa` epic in `bd list`.

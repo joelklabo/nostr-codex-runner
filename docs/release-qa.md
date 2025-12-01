@@ -19,6 +19,8 @@ Smoke checklist (per platform)
 5) `buddy run copilot-shell` (or claude-dm) starts with sample config/preset (if secrets available, otherwise skip)
 6) `buddy presets` lists built-ins
 7) `buddy help` shows commands
+8) `buddy check mock-echo -json` prints JSON with status fields
+9) `buddy presets claude-dm --yaml` respects overrides if `~/.config/buddy/presets/claude-dm.yaml` exists
 
 Brew checklist (macOS)
 - `brew install joelklabo/tap/buddy`
@@ -29,7 +31,11 @@ Alias checks
 - If alias packaged: `nostr-buddy --version` maps to same build; ensure warning about legacy binary name not printed when using alias.
 
 Logging/metrics
-- Optional: run with `-health-listen 127.0.0.1:8081 -metrics-listen 127.0.0.1:9090` and curl `/health`.
+- Optional: run with `-health-listen 127.0.0.1:8081 -metrics-listen 127.0.0.1:9090`; curl `/health` and `/metrics` (expect 200 + Prometheus text format).
+
+Man page
+- `make man` succeeds on release branch.
+- Extract archive and ensure `share/man/man1/buddy.1` is present; `man -M <extract>/share/man buddy` renders without errors (macOS/Linux).
 
 Fail-fast criteria
 - Version mismatch, missing preset list, wizard failure, or checksum mismatch abort release.

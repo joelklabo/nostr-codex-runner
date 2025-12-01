@@ -217,7 +217,7 @@ func defaultStatePath() string {
 	if err != nil {
 		return "state.db"
 	}
-	return filepath.Join(home, ".local", "share", "buddy", "state.db")
+	return filepath.Join(home, ".buddy", "state.db")
 }
 
 func fileExists(path string) bool {

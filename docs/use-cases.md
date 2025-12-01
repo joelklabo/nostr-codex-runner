@@ -1,6 +1,6 @@
 # Buddy Example Use Cases (argument-only)
 
-Fast, copy-paste flows that assume you installed the `buddy` binary and have keys ready. Commands avoid flags; use positional arguments and presets.
+Fast, copy-paste flows that assume you installed the `buddy` binary and have keys ready. Easiest path: run `buddy wizard` once to generate `~/.config/buddy/config.yaml`, then use the presets below. Commands avoid flags; use positional arguments and presets.
 
 ## 1) Nostr DM to Claude/OpenAI (hosted model)
 - Start the preset:
@@ -20,7 +20,7 @@ Fast, copy-paste flows that assume you installed the `buddy` binary and have key
   ```bash
   buddy run local-llm
   ```
-- What happens: loads the local LLM preset, points the agent at your local endpoint/binary (see preset notes), keeps traffic on your machine. Nostr is still the transport unless you swap to `mock`.
+- What happens: loads the local LLM preset, points the agent at your local endpoint/binary (see preset notes), keeps traffic on your machine. Nostr is the default transport; to stay fully offline, drop a preset override at `~/.config/buddy/presets/local-llm.yaml` that sets `type: mock` for transport.
 - Try it: send
   ```text
   /new Summarize the last git commit in 2 sentences.
@@ -41,6 +41,7 @@ Fast, copy-paste flows that assume you installed the `buddy` binary and have key
 - Expected: shell output truncated per config; model replies with the script. Keep this preset to trusted operators only.
 
 ## Tips
-- Config search order: CLI arg path > `./config.yaml` > `~/.config/buddy/config.yaml`.
-- Presets live in assets/presets (embedded) and can be overridden by `~/.config/buddy/presets/<name>.yaml`.
+- Config search order: CLI arg path > `BUDDY_CONFIG` > `./config.yaml` > `~/.config/buddy/config.yaml`.
+- Presets are embedded but are overridden by `~/.config/buddy/presets/<name>.yaml`, then `./presets/<name>.yaml` if present.
 - If another `buddy` binary is on your PATH (e.g., Buddy.Works), invoke via the alias you choose (e.g., `nostr-buddy`).
+- Recipe: see `docs/recipes/local-llm-mock.md` for a fully offline local-llm setup.

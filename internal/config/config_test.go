@@ -53,6 +53,33 @@ projects:
 	}
 }
 
+func TestLoadAddsReadfileWhenActionsEmpty(t *testing.T) {
+	cfgPath := writeTempConfig(t, `
+runner:
+  private_key: "abcd"
+  allowed_pubkeys: ["1234"]
+storage:
+  path: "./state.db"
+transports:
+  - type: mock
+    id: mock
+agent:
+  type: echo
+actions: []
+projects:
+  - id: default
+    path: .
+    name: default
+`)
+	cfg, err := Load(cfgPath)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	if len(cfg.Actions) == 0 || cfg.Actions[0].Type != "readfile" {
+		t.Fatalf("expected default readfile action, got %#v", cfg.Actions)
+	}
+}
+
 func TestLoadMissingRequiredFails(t *testing.T) {
 	cfgPath := writeTempConfig(t, `
 runner:

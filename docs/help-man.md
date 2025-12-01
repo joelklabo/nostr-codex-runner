@@ -1,7 +1,7 @@
 # Help / Man Page Plan – Issue 3oa.35
 
 Goals
-- Concise `buddy help` output matching CLI map.
+- Concise `buddy help` output matching CLI map (run/check/wizard/presets/init-config/version).
 - Optional `man buddy` generated during release packaging.
 
 CLI help content (target)
@@ -9,6 +9,8 @@ CLI help content (target)
 buddy run <preset|config>      start the runner from a preset or YAML config
 buddy wizard [config-path]     guided setup; writes a config (supports dry-run)
 buddy presets [name]           list built-in presets or show details
+buddy check <preset|config>    verify dependencies (use --json for machine output)
+buddy init-config [path]       write example config if missing
 buddy version                  show version info
 buddy help [cmd]               show this help
 ```

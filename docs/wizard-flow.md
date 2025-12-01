@@ -29,7 +29,7 @@ This is the draft script/IA for `buddy wizard [config-path]`.
    - For read/write: roots list.
 
 6) **Runner settings**
-   - Session timeout (default 60m), initial prompt (optional), log level (info|debug), storage path (BoltDB default `~/.local/share/buddy/state.db`).
+   - Session timeout (default 60m), initial prompt (optional), log level (info|debug), storage path (BoltDB default `~/.buddy/state.db`).
 
 7) **Summary + path**
    - Show preset name (or blank), transport/agent/actions summary, and config path.

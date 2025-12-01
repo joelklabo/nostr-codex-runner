@@ -14,6 +14,8 @@ buddy - pluggable transport → agent → actions runner with presets and wizard
 
 **buddy check** <preset|config> [ -config path ] [ -json ]
 
+**buddy init-config** [path]
+
 **buddy version**
 
 **buddy help** [command]
@@ -34,6 +36,9 @@ List built-in presets or print one as YAML when a name is provided.
 **check**  
 Verify dependencies declared by config or preset. Flags: -config, -json.
 
+**init-config**  
+Write the bundled example config to ./config.yaml (or the provided path) if missing.
+
 **version**  
 Print version info.
 
@@ -46,7 +51,7 @@ Show summary or command-specific help.
 # FILES
 `~/.config/buddy/config.yaml` — default config path.  
 `~/.config/buddy/presets/` — user preset overrides.  
-`~/.local/share/buddy/state.db` — BoltDB state (session mapping, cursors).
+`~/.buddy/state.db` — BoltDB state (session mapping, cursors).
 
 # EXIT STATUS
 0 on success, non-zero on errors.
