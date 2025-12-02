@@ -89,17 +89,18 @@ type AgentConfig struct {
 
 // ActionConfig defines an action plugin instance.
 type ActionConfig struct {
-	Type         string   `yaml:"type"`
-	Name         string   `yaml:"name"`
-	Workdir      string   `yaml:"workdir"`
-	Allowed      []string `yaml:"allowed"`
-	TimeoutSecs  int      `yaml:"timeout_seconds"`
-	MaxOutput    int      `yaml:"max_output"`
-	Roots        []string `yaml:"roots"`
-	AllowWrite   bool     `yaml:"allow_write"`
-	MaxBytes     int64    `yaml:"max_bytes"`
-	Capabilities []string `yaml:"capabilities"`
-	Description  string   `yaml:"description"`
+	Type             string   `yaml:"type"`
+	Name             string   `yaml:"name"`
+	Workdir          string   `yaml:"workdir"`
+	Allowed          []string `yaml:"allowed"`
+	TimeoutSecs      int      `yaml:"timeout_seconds"`
+	MaxOutput        int      `yaml:"max_output"`
+	Roots            []string `yaml:"roots"`
+	AllowWrite       bool     `yaml:"allow_write"`
+	MaxBytes         int64    `yaml:"max_bytes"`
+	Capabilities     []string `yaml:"capabilities"`
+	Description      string   `yaml:"description"`
+	UnsafeAllowEmpty bool     `yaml:"unsafe_allow_empty"`
 }
 
 // Load reads and validates configuration from the provided path.
@@ -166,6 +167,12 @@ func (c *Config) Validate() error {
 		if p.Path == "" {
 			return fmt.Errorf("project %s has empty path", p.ID)
 		}
+	}
+	if err := c.ValidateTransports(); err != nil {
+		return err
+	}
+	if err := c.ValidateActions(); err != nil {
+		return err
 	}
 	return nil
 }

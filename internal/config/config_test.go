@@ -30,6 +30,7 @@ agent:
   type: echo
 actions:
   - type: shell
+    allowed: ["echo"]
 projects:
   - id: default
     path: .
