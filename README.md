@@ -88,6 +88,7 @@ flowchart LR
 - Email transport design: `docs/transport-email.md`
 - Logging/PII safety: `docs/logging-safety.md`
 - CLI surface/config search/FAQ: `docs/readme-details.md`
+- Release checklist: `docs/release-checklist.md`
 
 ## Contributing
 
