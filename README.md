@@ -77,7 +77,7 @@ flowchart LR
 | `readfile` | Read files | Root allowlists + size caps. |
 | `writefile` | Write files | Explicit opt-in; root allowlists + size caps. |
 
-## Docs (essentials)
+## Docs
 
 - Quick install: `docs/quick-install-ia.md`
 - Use cases: `docs/use-cases.md`
@@ -85,7 +85,8 @@ flowchart LR
 - Wizard: `docs/wizard.md`
 - Presets & overrides: `docs/presets.md`
 - Offline local LLM (mock): `docs/recipes/local-llm-mock.md`
-- More detail (CLI surface, config search, FAQ): `docs/readme-details.md`
+- Email transport design: `docs/transport-email.md`
+- CLI surface/config search/FAQ: `docs/readme-details.md`
 
 ## Contributing
 
