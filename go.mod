@@ -5,7 +5,7 @@ go 1.24.10
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/emersion/go-imap v1.2.1
-	github.com/emersion/go-message v0.18.0
+	github.com/emersion/go-message v0.18.2
 	github.com/nbd-wtf/go-nostr v0.52.3
 	github.com/prometheus/client_golang v1.23.2
 	go.etcd.io/bbolt v1.4.3
@@ -27,7 +27,6 @@ require (
 	github.com/decred/dcrd/crypto/blake256 v1.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21 // indirect
-	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
