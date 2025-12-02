@@ -15,6 +15,7 @@ import (
 	"github.com/joelklabo/buddy/internal/config"
 	"github.com/joelklabo/buddy/internal/core"
 	"github.com/joelklabo/buddy/internal/store"
+	imap "github.com/joelklabo/buddy/internal/transports/email/imap"
 	memg "github.com/joelklabo/buddy/internal/transports/email/mailgun"
 	tmock "github.com/joelklabo/buddy/internal/transports/mock"
 	tnostr "github.com/joelklabo/buddy/internal/transports/nostr"
@@ -53,6 +54,19 @@ func Build(cfg *config.Config, st *store.Store, logger *slog.Logger) (*core.Runn
 					return nil, err
 				}
 				transports = append(transports, mt)
+			case "imap":
+				var icfg imap.Config
+				if err := decodeMap(t.Config, &icfg); err != nil {
+					return nil, fmt.Errorf("decode imap config: %w", err)
+				}
+				if icfg.ID == "" {
+					icfg.ID = t.ID
+				}
+				it, err := imap.New(icfg)
+				if err != nil {
+					return nil, err
+				}
+				transports = append(transports, it)
 			default:
 				return nil, fmt.Errorf("unknown email mode %s", mode)
 			}
